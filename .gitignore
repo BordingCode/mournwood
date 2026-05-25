@@ -1,0 +1,9 @@
+# tooling / local
+.playwright-mcp/
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+
+# local-only Claude settings (keep out of the shared repo)
+.claude/settings.local.json

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+  <meta name="theme-color" content="#0A0E27" />
+  <meta name="description" content="Mournwood — a dark-arcane roguelite card adventure." />
+  <title>Mournwood</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <!-- Loading splash -->
+  <div id="splash" class="splash">
+    <div class="splash-mark">MOURNWOOD</div>
+    <div class="splash-sub">kindling the ash…</div>
+  </div>
+
+  <!-- Game mounts here -->
+  <main id="app" class="app" aria-live="polite"></main>
+
+  <!-- Floating layers -->
+  <div id="fx-layer" class="fx-layer" aria-hidden="true"></div>
+
+  <!-- Vendored libraries (work offline once cached) -->
+  <script src="js/vendor/gsap.min.js" defer></script>
+  <script src="js/vendor/howler.min.js" defer></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
