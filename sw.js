@@ -1,14 +1,22 @@
-/* Mournwood service worker — offline-first app shell. Bump CACHE on release. */
-const CACHE = 'mournwood-v1';
+/* Mournwood service worker — network-first (fresh code online, full offline fallback). */
+const CACHE = 'mournwood-v2';
 const SHELL = [
   './',
   'index.html',
   'manifest.json',
   'css/main.css',
+  'css/combat.css',
   'js/main.js',
   'js/rng.js',
   'js/ui.js',
   'js/state.js',
+  'js/audio.js',
+  'js/fx.js',
+  'js/statuses.js',
+  'js/cards.js',
+  'js/enemies.js',
+  'js/combat.js',
+  'js/screens/combat.js',
   'js/data/classes.js',
   'js/data/races.js',
   'js/vendor/gsap.min.js',
@@ -31,22 +39,21 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Cache-first for same-origin GET; fall back to network and cache it; offline-safe.
+// Network-first for same-origin GET: always try fresh, cache the result, and fall
+// back to cache (then index.html) when offline. Cross-origin requests pass through.
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
+  if (new URL(req.url).origin !== location.origin) return;
   e.respondWith(
-    caches.match(req).then((hit) => {
-      if (hit) return hit;
-      return fetch(req)
-        .then((res) => {
-          if (res && res.status === 200 && (res.type === 'basic' || res.type === 'cors')) {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-          }
-          return res;
-        })
-        .catch(() => caches.match('index.html'));
-    })
+    fetch(req)
+      .then((res) => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        }
+        return res;
+      })
+      .catch(() => caches.match(req).then((hit) => hit || caches.match('index.html')))
   );
 });

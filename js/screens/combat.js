@@ -1,0 +1,195 @@
+// Combat screen: drives the pure engine (combat.js), renders the board, handles
+// tap-to-target input, fires GSAP juice via engine hooks, shows win/lose overlay.
+
+import { el, mount, screen, $ } from '../ui.js';
+import { Combat } from '../combat.js';
+import { STATUSES } from '../statuses.js';
+import * as FX from '../fx.js';
+import { Audio } from '../audio.js';
+
+let C, ui, selUid = null, targeting = false, pending = [], cbWin, cbLose;
+
+const idOf = (e) => (e.isPlayer ? 'player' : e.uid);
+
+export function startCombat({ rng, player, enemyIds, onWin, onLose }) {
+  cbWin = onWin; cbLose = onLose; selUid = null; targeting = false; pending = [];
+  const hooks = {
+    onDamage: (e) => pending.push({ t: 'dmg', uid: idOf(e.target), amount: e.amount, poison: e.poison }),
+    onBlock:  (e) => e.amount > 0 && pending.push({ t: 'blk', uid: idOf(e.entity), amount: e.amount }),
+    onHeal:   (e) => e.amount > 0 && pending.push({ t: 'heal', uid: idOf(e.entity), amount: e.amount }),
+    onTurnStart: (e) => e.who === 'player' && pending.push({ t: 'turn' }),
+    onEnd:    (e) => pending.push({ t: 'end', result: e.result }),
+  };
+  C = new Combat({ rng, player, enemyIds, hooks });
+  buildShell();
+  C.start();
+  renderBoard();
+  flush();
+}
+
+function buildShell() {
+  const s = screen('combat');
+  ui = {
+    enemies: el('div.enemies', { dataset: { testid: 'enemies' } }),
+    player:  el('div.player-panel', { dataset: { testid: 'player' } }),
+    hand:    el('div.hand', { dataset: { testid: 'hand' } }),
+    foot:    el('div.combat-foot'),
+  };
+  s.append(ui.enemies, ui.player, el('div.hand-wrap', {}, [ui.hand]), ui.foot);
+  mount(s);
+  ui.root = s;
+}
+
+/* ---------------- render ---------------- */
+function renderBoard() {
+  const snap = C.snapshot();
+  renderEnemies(snap);
+  renderPlayer(snap);
+  renderHand(snap);
+  renderFoot(snap);
+  window.__gameState = { screen: 'combat', ...snap, selUid, targeting };
+}
+
+function statusChips(statuses) {
+  return Object.entries(statuses || {}).filter(([, v]) => v).map(([id, v]) => {
+    const d = STATUSES[id] || { icon: '?', name: id };
+    return el('span.chip', { title: `${d.name} ${v}` }, [d.icon, String(v)]);
+  });
+}
+
+function hpBar(hp, maxHp, isPlayer, block) {
+  const bar = el('div.hpbar' + (isPlayer ? '.player' : ''), {}, [
+    el('i', { style: { transform: `scaleX(${Math.max(0, hp / maxHp)})` } }),
+    el('span', {}, `${hp}/${maxHp}`),
+  ]);
+  if (block > 0) bar.append(el('div.blockbadge', { title: 'Block' }, ['🛡', String(block)]));
+  return bar;
+}
+
+function renderEnemies(snap) {
+  const living = snap.enemies.filter((e) => e.hp > 0).length;
+  ui.enemies.replaceChildren(...snap.enemies.map((e) => {
+    const dead = e.hp <= 0;
+    const canTarget = targeting && !dead;
+    const node = el('div.enemy' + (dead ? '.dead' : '') + (canTarget ? '.targetable' : ''),
+      { dataset: { uid: e.uid, testid: 'enemy' } }, [
+        e.intent && !dead
+          ? el('div.intent.' + e.intent.type, {}, [e.intent.icon, e.intent.amount ? String(e.intent.amount) : ''])
+          : el('div.intent', { style: { visibility: 'hidden' } }, '·'),
+        el('div.portrait', {}, dead ? '☠️' : enemyEmoji(e)),
+        el('div.ename', {}, e.name),
+        hpBar(e.hp, e.maxHp, false, e.block),
+        el('div.statuses', {}, statusChips(e.statuses)),
+      ]);
+    if (canTarget) node.addEventListener('click', () => resolve(selUid, e.uid));
+    return node;
+  }));
+  // remember count for auto-target
+  ui._living = living;
+}
+function enemyEmoji(e) { return ({ goblin: '👺', skeleton: '💀', direwolf: '🐺' })[e.name?.toLowerCase?.()] || e.emoji || '👾'; }
+
+function renderPlayer(snap) {
+  const p = snap.player;
+  ui.player.replaceChildren(
+    el('div.who', {}, 'You'),
+    el('div.bars', {}, [ hpBar(p.hp, p.maxHp, true, p.block), el('div.statuses', {}, statusChips(p.statuses)) ]),
+  );
+}
+
+function renderHand(snap) {
+  ui.hand.replaceChildren(...snap.hand.map((c) => {
+    const disabled = c.cost > snap.player.energy || c.unplayable;
+    const node = el('button.card' + (c.uid === selUid ? '.sel' : '') + (disabled ? '.disabled' : ''), {
+      dataset: { type: c.type, uid: c.uid, cid: c.id, testid: 'card' },
+    }, [
+      el('div.cost', {}, String(c.cost)),
+      el('div.cname', {}, c.name),
+      el('div.ctype', {}, c.type),
+      el('div.ctext', {}, cardText(c)),
+    ]);
+    if (!disabled) node.addEventListener('click', () => onCardClick(c));
+    return node;
+  }));
+}
+function cardText(c) { return c.text || ''; }
+
+function renderFoot(snap) {
+  const p = snap.player;
+  const pips = [];
+  for (let i = 0; i < C.maxEnergy; i++) pips.push(el('span.pip' + (i >= p.energy ? '.spent' : '')));
+  ui.foot.replaceChildren(
+    el('div.energy', { dataset: { testid: 'energy' } }, [ el('span.energy-big', {}, `⚡ ${p.energy}/${C.maxEnergy}`) ]),
+    el('div.hint', {}, targeting ? 'Tap an enemy to target…' : ''),
+    el('button.btn.btn-primary.btn-end', { dataset: { testid: 'btn-end-turn' }, disabled: C.over,
+      onclick: endTurn }, 'End Turn'),
+  );
+}
+
+/* ---------------- input ---------------- */
+function onCardClick(card) {
+  if (C.over) return;
+  if (card.target === 'enemy') {
+    const living = C.livingEnemies();
+    if (living.length === 1) return resolve(card.uid, living[0].uid); // auto-target
+    selUid = (selUid === card.uid) ? null : card.uid;
+    targeting = !!selUid;
+    renderBoard();
+  } else {
+    resolve(card.uid, null);
+  }
+}
+
+function resolve(uid, targetUid) {
+  const ok = C.play(uid, targetUid);
+  if (!ok) return;
+  Audio.play('card');
+  selUid = null; targeting = false;
+  renderBoard();
+  flush();
+}
+
+function endTurn() {
+  if (C.over) return;
+  selUid = null; targeting = false;
+  C.endTurn();
+  renderBoard();
+  flush();
+}
+
+/* ---------------- juice ---------------- */
+function elFor(uid) {
+  if (uid === 'player') return ui.player.querySelector('.bars') || ui.player;
+  const node = ui.enemies.querySelector(`[data-uid="${uid}"] .portrait`);
+  return node || ui.enemies;
+}
+
+function flush() {
+  let ended = null, turn = false;
+  for (const ev of pending) {
+    if (ev.t === 'dmg' && ev.amount > 0) {
+      const tgt = elFor(ev.uid);
+      FX.floatText(tgt, '-' + ev.amount, { color: ev.poison ? '#84cc5a' : '#ff6b6b' });
+      FX.hitFlash(tgt);
+      if (ev.uid === 'player') FX.screenShake(6);
+    } else if (ev.t === 'blk') {
+      FX.floatText(elFor(ev.uid), '+' + ev.amount + '🛡', { color: '#9ec5ff', up: 44 });
+    } else if (ev.t === 'heal') {
+      FX.floatText(elFor(ev.uid), '+' + ev.amount, { color: '#34d399', up: 44 });
+    } else if (ev.t === 'turn') { turn = true; }
+    else if (ev.t === 'end') { ended = ev.result; }
+  }
+  pending = [];
+  if (turn) FX.dealIn([...ui.hand.children]);
+  if (ended) setTimeout(() => showResult(ended), 420);
+}
+
+function showResult(result) {
+  const overlay = el('div.result.' + result, { dataset: { testid: 'result' } }, [
+    el('h2', {}, result === 'win' ? 'Victory' : 'Defeat'),
+    el('button.btn.btn-primary', { dataset: { testid: 'btn-result' },
+      onclick: () => { overlay.remove(); (result === 'win' ? cbWin : cbLose)?.(); } },
+      result === 'win' ? 'Continue' : 'Return'),
+  ]);
+  document.getElementById('fx-layer').appendChild(overlay);
+}

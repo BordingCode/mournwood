@@ -4,6 +4,8 @@ import { el, mount, screen, hideSplash } from './ui.js';
 import { Game, syncDebug } from './state.js';
 import { CLASSES, CLASS_BY_ID } from './data/classes.js';
 import { RACES, RACE_BY_ID } from './data/races.js';
+import { starterFor } from './cards.js';
+import { startCombat } from './screens/combat.js';
 
 /* ---------------- boot ---------------- */
 function boot() {
@@ -105,7 +107,31 @@ function markSel(grid, id) {
 function startAdventure() {
   const { raceId, classId } = Game.selection;
   if (!raceId || !classId) return;
-  go('hub'); // Phase 4 builds the real hub/map; stub for now.
+  // Phase 4 routes combat through the map; for now Begin drops into a test encounter
+  // so the combat core is fully playable.
+  startEncounter();
+}
+
+// Builds the player from the chosen race+class and launches a combat.
+function startEncounter() {
+  const c = CLASS_BY_ID[Game.selection.classId];
+  const r = RACE_BY_ID[Game.selection.raceId];
+  const player = {
+    name: `${r.name} ${c.name}`,
+    maxHp: c.hp, hp: c.hp,
+    deck: starterFor(c.id),
+    statuses: {},
+  };
+  const pack = Game.rng.chance(0.5) ? ['goblin', 'goblin'] : ['goblin'];
+  Game.screen = 'combat';
+  syncDebug();
+  startCombat({
+    rng: Game.rng,
+    player,
+    enemyIds: pack,
+    onWin: () => go('hub'),
+    onLose: () => go('title'),
+  });
 }
 
 /* ---------------- temporary hub stub (until Phase 4) ---------------- */
