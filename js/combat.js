@@ -278,7 +278,7 @@ export class Combat {
       turn: this.turn, over: this.over, result: this.result, cardsThisTurn: this.cardsThisTurn,
       relics: this.relics.slice(), potions: this.potions.slice(),
       player: { hp: this.player.hp, maxHp: this.player.maxHp, block: this.player.block, energy: this.player.energy, statuses: { ...this.player.statuses } },
-      enemies: this.enemies.map((e) => ({ uid: e.uid, name: e.name, emoji: e.emoji, hp: e.hp, maxHp: e.maxHp, block: e.block, statuses: { ...e.statuses }, intent: e.intent, boss: !!e.boss, phase: e.phase })),
+      enemies: this.enemies.map((e) => ({ uid: e.uid, id: e.id, name: e.name, hp: e.hp, maxHp: e.maxHp, block: e.block, statuses: { ...e.statuses }, intent: e.intent, boss: !!e.boss, phase: e.phase })),
       hand: this.hand.map((c) => ({ uid: c.uid, id: c.id, name: c.name, cost: c.cost, type: c.type, target: c.target, text: c.text, spell: c.spell, unplayable: c.unplayable })),
       piles: { draw: this.drawPile.length, discard: this.discardPile.length, exhaust: this.exhaustPile.length },
     };

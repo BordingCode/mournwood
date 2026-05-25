@@ -4,6 +4,7 @@
 import { el } from '../ui.js';
 import { CARDS } from '../cards.js';
 import { STATUSES } from '../statuses.js';
+import { iconEl } from '../icons.js';
 
 function overlay(title, body, testid) {
   const ov = el('div.qol-overlay', { dataset: { testid } }, [
@@ -31,7 +32,7 @@ export function openDeckViewer(title, cardIds) {
 }
 
 export function openCodex() {
-  const rows = Object.values(STATUSES).map((s) =>
-    el('div.codex-row', {}, [el('span.ico', {}, s.icon), el('div', {}, [el('b', {}, s.name), el('span.blurb', {}, s.desc)])]));
+  const rows = Object.entries(STATUSES).map(([id, s]) =>
+    el('div.codex-row', {}, [iconEl(id, 'big'), el('div', {}, [el('b', {}, s.name), el('span.blurb', {}, s.desc)])]));
   overlay('Keywords', rows, 'codex');
 }

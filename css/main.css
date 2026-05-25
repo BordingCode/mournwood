@@ -153,6 +153,14 @@ body.text-lg { font-size:18px; }
 body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after { animation-duration:.001ms !important; transition-duration:.001ms !important; }
 body.cb { --red:#d55e00; --green:#009e73; --blue:#0072b2; --amber:#f0e442; --poison:#009e73; }
 
+/* ---------------- icons & art ---------------- */
+.ico { display:inline-flex; align-items:center; justify-content:center; width:1em; height:1em; vertical-align:-0.16em; flex:none; line-height:0; }
+.ico svg { width:100%; height:100%; display:block; }
+.art { display:inline-flex; align-items:center; justify-content:center; width:1em; height:1em; line-height:0; }
+.art-img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+.pick .emoji .ico { width:1.7rem; height:1.7rem; }
+.hub-hero { display:inline-flex; align-items:center; gap:.4rem; justify-content:center; }
+
 /* utility */
 .hidden { display:none !important; }
 @media (prefers-reduced-motion: reduce) {

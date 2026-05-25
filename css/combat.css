@@ -29,6 +29,12 @@
 .intent.buff { color:#ffd97a; }
 .intent.debuff { color:#c9a6ff; }
 
+.portrait .ico, .portrait .art { width:56px; height:56px; color:var(--parchment); }
+.portrait .art-img { border-radius:16px; }
+.potion .ico { width:1.35em; height:1.35em; }
+.energy-big { display:inline-flex; align-items:center; gap:.3rem; }
+.energy-big .ico { color:var(--amber); }
+.intent .ico { color:inherit; }
 .portrait { width:74px; height:74px; border-radius:18px; display:grid; place-items:center;
   font-size:2.6rem; line-height:1;
   background:radial-gradient(circle at 50% 35%, rgba(125,63,184,.35), rgba(20,26,58,.9));

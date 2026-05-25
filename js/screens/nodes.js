@@ -41,7 +41,7 @@ export function openShop(run, { back }) {
       el('button.btn', { disabled: sold[key] || run.gold < price || !can, onclick: () => { if (run.gold >= price) { run.gold -= price; buy(); sold[key] = true; render(); } } }, sold[key] ? 'Sold' : `${price}🪙`),
     ]);
     s.append(
-      head('Wandering Merchant', `Gold: ${run.gold} 🪙`),
+      head('Wandering Merchant', `Gold: ${run.gold}`),
       el('div.scroll', {}, [
         ...stock.cards.map((id, i) => row(CARDS[id].name, CARDS[id].text, 50, true, () => run.deck.push(id), 'c' + i)),
         relicId ? row('★ ' + RELICS[relicId].name, RELICS[relicId].desc, 120, true, () => run.relics.push(relicId), 'r') : null,

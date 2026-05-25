@@ -3,8 +3,11 @@
 // transformed by the camera. Exposes window.__map for headless testing.
 
 import { el, mount, screen } from '../ui.js';
-import { CLASS_BY_ID } from '../data/classes.js';
 import { bossUnlocked } from '../run.js';
+import { iconEl } from '../icons.js';
+import { artOrFallback } from '../art.js';
+
+const POI_ICON = { hub:'hub', combat:'combat', elite:'skeleton', shop:'shop', rest:'rest', event:'event', ward:'ward', boss:'boss' };
 
 const SPEED = 270;          // px / second
 const INTERACT_R = 82;
@@ -42,23 +45,23 @@ function build() {
     const locked = p.type === 'boss' && !bossUnlocked(run);
     const node = el('div.poi' + (cleared ? '.cleared' : '') + (locked ? '.locked' : ''),
       { dataset: { id: p.id, type: p.type }, style: { left: p.x + 'px', top: p.y + 'px' } }, [
-        el('div.poi-icon', {}, locked ? '🔒' : p.icon),
+        el('div.poi-icon', {}, iconEl(locked ? 'lock' : (POI_ICON[p.type] || 'dot'))),
         el('div.poi-name', {}, p.name),
       ]);
     world.appendChild(node);
   }
   hero = el('div.hero', { style: { left: run.pos.x + 'px', top: run.pos.y + 'px' } },
-    (CLASS_BY_ID[run.cls]?.emoji) || '🧝');
+    [artOrFallback(`assets/portraits/hero-${run.cls}.webp`, iconEl(run.cls))]);
   world.appendChild(hero);
 
   viewport = el('div.viewport', {}, [world]);
 
   // HUD
-  hudHp = el('span.hud-hp', { dataset: { testid: 'hud-hp' } }, `❤ ${run.hp}/${run.maxHp}`);
-  hudGold = el('span.hud-gold', {}, `🪙 ${run.gold}`);
+  hudHp = el('span.hud-hp', { dataset: { testid: 'hud-hp' } }, [iconEl('heart'), el('span.val', {}, `${run.hp}/${run.maxHp}`)]);
+  hudGold = el('span.hud-gold', {}, [iconEl('coin'), el('span.val', {}, `${run.gold}`)]);
   const hud = el('div.map-hud', {}, [
     el('div.hud-left', {}, [hudHp, hudGold]),
-    el('button.btn.btn-ghost.hud-menu', { dataset: { testid: 'btn-menu' }, onclick: leaveTo(onMenu) }, '☰'),
+    el('button.btn.btn-ghost.hud-menu', { dataset: { testid: 'btn-menu' }, onclick: leaveTo(onMenu) }, iconEl('menu')),
   ]);
 
   // joystick
@@ -180,7 +183,10 @@ function leave() {
 function leaveTo(fn) { return () => { leave(); fn && fn(); }; }
 
 /* ---------------- HUD / debug / toast ---------------- */
-function syncHud() { if (hudHp) hudHp.textContent = `❤ ${run.hp}/${run.maxHp}`; if (hudGold) hudGold.textContent = `🪙 ${run.gold}`; }
+function syncHud() {
+  const h = hudHp && hudHp.querySelector('.val'); if (h) h.textContent = `${run.hp}/${run.maxHp}`;
+  const g = hudGold && hudGold.querySelector('.val'); if (g) g.textContent = `${run.gold}`;
+}
 
 function toast(msg) {
   const t = el('div.toast', {}, msg);

@@ -13,10 +13,13 @@ import { saveRun, loadRun, hasAny, clearSlot } from './save.js';
 import { openSaves } from './screens/saves.js';
 import { openSettings, applySettings } from './settings.js';
 import { openDeckViewer } from './screens/qol.js';
+import { iconEl } from './icons.js';
+import { loadArtManifest } from './art.js';
 
 /* ---------------- boot ---------------- */
 function boot() {
   applySettings(); // restore + apply saved preferences (volume, motion, text size, …)
+  loadArtManifest(); // know which assets/ images exist (avoids 404s on empty slots)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
@@ -100,7 +103,7 @@ function pickCard(kind, item, tagline, onclick) {
     dataset:{ testid:`pick-${kind}-${item.id}`, id:item.id },
     onclick,
   }, [
-    el('span.emoji', {}, item.emoji),
+    el('span.emoji', {}, iconEl(item.id)),
     el('span.name', {}, item.name),
     el('span.tagline', {}, tagline),
     el('span.blurb', {}, item.blurb),

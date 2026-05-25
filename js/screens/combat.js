@@ -9,10 +9,14 @@ import { POTIONS } from '../potions.js';
 import * as FX from '../fx.js';
 import { Audio } from '../audio.js';
 import { openDeckViewer, openCodex } from './qol.js';
+import { iconEl } from '../icons.js';
+import { artOrFallback } from '../art.js';
 
 let C, ui, selUid = null, targeting = false, pending = [], cbWin, cbLose;
 
 const idOf = (e) => (e.isPlayer ? 'player' : e.uid);
+const ENEMY_ICON = { goblin:'goblin', skeleton:'skeleton', direwolf:'beast', bandit:'bandit', orc:'orc', cultist:'cultist', orc_berserker:'orc', cult_zealot:'cultist', high_priest:'boss' };
+const INTENT_ICON = { attack:'sword', block:'shield', buff:'chevup', debuff:'chevdown' };
 
 export function startCombat({ rng, player, enemyIds, onWin, onLose }) {
   cbWin = onWin; cbLose = onLose; selUid = null; targeting = false; pending = [];
@@ -58,20 +62,20 @@ function renderBoard() {
 
 function renderTopBar(snap) {
   const relics = snap.relics.map((id) => {
-    const r = RELICS[id] || { icon: '◆', name: id, desc: '' };
-    return el('span.relic', { title: `${r.name} — ${r.desc}` }, r.icon);
+    const r = RELICS[id] || { name: id, desc: '' };
+    return el('span.relic', { title: `${r.name} — ${r.desc}` }, iconEl('gem'));
   });
   const potions = snap.potions.map((id, i) => {
-    const p = POTIONS[id] || { icon: '🧪', name: id, desc: '' };
+    const p = POTIONS[id] || { name: id, desc: '' };
     return el('button.potion', { title: `${p.name} — ${p.desc}`, dataset: { testid: 'potion' },
-      disabled: C.over, onclick: () => usePotion(i) }, p.icon);
+      disabled: C.over, onclick: () => usePotion(i) }, iconEl('flask'));
   });
   ui.topbar.replaceChildren(
     el('div.relic-row', { dataset: { testid: 'relics' } }, relics.length ? relics : [el('span.muted', {}, '')]),
     el('div.potion-row', {}, [
       ...potions,
-      el('button.potion', { title: 'View deck', dataset: { testid: 'btn-deck' }, onclick: () => openDeckViewer('Deck', deckIds()) }, '🂠'),
-      el('button.potion', { title: 'Keywords', dataset: { testid: 'btn-codex' }, onclick: openCodex }, '📜'),
+      el('button.potion', { title: 'View deck', dataset: { testid: 'btn-deck' }, onclick: () => openDeckViewer('Deck', deckIds()) }, iconEl('cards')),
+      el('button.potion', { title: 'Keywords', dataset: { testid: 'btn-codex' }, onclick: openCodex }, iconEl('scroll')),
     ]),
   );
 }
@@ -84,8 +88,8 @@ function usePotion(idx) {
 
 function statusChips(statuses) {
   return Object.entries(statuses || {}).filter(([, v]) => v).map(([id, v]) => {
-    const d = STATUSES[id] || { icon: '?', name: id };
-    return el('span.chip', { title: `${d.name} ${v}` }, [d.icon, String(v)]);
+    const d = STATUSES[id] || { name: id };
+    return el('span.chip', { title: `${d.name} ${v}` }, [iconEl(id), String(v)]);
   });
 }
 
@@ -94,7 +98,7 @@ function hpBar(hp, maxHp, isPlayer, block) {
     el('i', { style: { transform: `scaleX(${Math.max(0, hp / maxHp)})` } }),
     el('span', {}, `${hp}/${maxHp}`),
   ]);
-  if (block > 0) bar.append(el('div.blockbadge', { title: 'Block' }, ['🛡', String(block)]));
+  if (block > 0) bar.append(el('div.blockbadge', { title: 'Block' }, [iconEl('shield'), String(block)]));
   return bar;
 }
 
@@ -106,9 +110,9 @@ function renderEnemies(snap) {
     const node = el('div.enemy' + (dead ? '.dead' : '') + (canTarget ? '.targetable' : ''),
       { dataset: { uid: e.uid, testid: 'enemy' } }, [
         e.intent && !dead
-          ? el('div.intent.' + e.intent.type, {}, [e.intent.icon, intentLabel(e.intent)])
+          ? el('div.intent.' + e.intent.type, {}, [iconEl(INTENT_ICON[e.intent.type] || 'sword'), intentLabel(e.intent)])
           : el('div.intent', { style: { visibility: 'hidden' } }, '·'),
-        el('div.portrait', {}, dead ? '☠️' : enemyEmoji(e)),
+        el('div.portrait', {}, dead ? iconEl('skeleton') : enemyArt(e)),
         el('div.ename', {}, e.name),
         hpBar(e.hp, e.maxHp, false, e.block),
         el('div.statuses', {}, statusChips(e.statuses)),
@@ -119,7 +123,7 @@ function renderEnemies(snap) {
   // remember count for auto-target
   ui._living = living;
 }
-function enemyEmoji(e) { return e.emoji || '👾'; }
+function enemyArt(e) { return artOrFallback(`assets/enemies/${e.id}.webp`, iconEl(ENEMY_ICON[e.id] || 'goblin')); }
 function intentLabel(it) { if (!it.amount) return ''; return it.times > 1 ? `${it.amount}×${it.times}` : String(it.amount); }
 
 function renderPlayer(snap) {
@@ -152,7 +156,7 @@ function renderFoot(snap) {
   const pips = [];
   for (let i = 0; i < C.maxEnergy; i++) pips.push(el('span.pip' + (i >= p.energy ? '.spent' : '')));
   ui.foot.replaceChildren(
-    el('div.energy', { dataset: { testid: 'energy' } }, [ el('span.energy-big', {}, `⚡ ${p.energy}/${C.maxEnergy}`) ]),
+    el('div.energy', { dataset: { testid: 'energy' } }, [ el('span.energy-big', {}, [iconEl('bolt'), ` ${p.energy}/${C.maxEnergy}`]) ]),
     el('div.hint', {}, targeting ? 'Tap an enemy to target…' : ''),
     el('button.btn.btn-primary.btn-end', { dataset: { testid: 'btn-end-turn' }, disabled: C.over,
       onclick: endTurn }, 'End Turn'),
@@ -206,7 +210,7 @@ function flush() {
       FX.hitFlash(tgt);
       if (ev.uid === 'player') FX.screenShake(6);
     } else if (ev.t === 'blk') {
-      FX.floatText(elFor(ev.uid), '+' + ev.amount + '🛡', { color: '#9ec5ff', up: 44 });
+      FX.floatText(elFor(ev.uid), '+' + ev.amount, { color: '#9ec5ff', up: 44 });
     } else if (ev.t === 'heal') {
       FX.floatText(elFor(ev.uid), '+' + ev.amount, { color: '#34d399', up: 44 });
     } else if (ev.t === 'turn') { turn = true; }

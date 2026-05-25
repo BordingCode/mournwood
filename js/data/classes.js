@@ -29,7 +29,7 @@ export const CLASSES = [
     blurb:'Wild magic that triggers itself — high risk, high spectacle.',
     mechanic:'Chaos: cards randomly chain into one another.' },
   { id:'cleric',    name:'Cleric',    emoji:'✨', hp:80, accent:'#ffd97a',
-    tagline:'Piety · heal ↔ block ↔ smite',
+    tagline:'Piety · heal /block /smite',
     blurb:'Faith woven into shield, mend, and righteous strike.',
     mechanic:'Piety converts healing into block and bonus smite damage.' },
   { id:'druid',     name:'Druid',     emoji:'🌿', hp:75, accent:'#86d05a',

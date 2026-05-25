@@ -16,6 +16,9 @@
 .poi[data-type="rest"] .poi-icon { border-color:#ffd97a; }
 .poi[data-type="shop"] .poi-icon { border-color:#ffe08a; }
 .poi[data-type="ward"] .poi-icon { border-color:var(--arcane-blue); box-shadow:0 0 18px rgba(96,165,250,.5); }
+.poi-icon .ico, .poi-icon .art { width:60%; height:60%; color:var(--parchment); }
+.hero .ico, .hero .art { width:64%; height:64%; color:#fff; }
+.hud-hp, .hud-gold { display:inline-flex; align-items:center; gap:.28rem; }
 .poi-name { font-size:.62rem; color:var(--parchment-dim); letter-spacing:.02em; }
 .poi.cleared { opacity:.3; filter:grayscale(.7); }
 
