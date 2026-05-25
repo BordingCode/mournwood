@@ -1,5 +1,5 @@
 /* Mournwood service worker — network-first (fresh code online, full offline fallback). */
-const CACHE = 'mournwood-v2';
+const CACHE = 'mournwood-v3';
 const SHELL = [
   './',
   'index.html',

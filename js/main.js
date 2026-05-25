@@ -14,7 +14,7 @@ import { openSaves } from './screens/saves.js';
 import { openSettings, applySettings } from './settings.js';
 import { openDeckViewer } from './screens/qol.js';
 import { iconEl } from './icons.js';
-import { loadArtManifest } from './art.js';
+import { loadArtManifest, bgImage, artOrFallback } from './art.js';
 
 /* ---------------- boot ---------------- */
 function boot() {
@@ -48,6 +48,7 @@ function routeTitle() {
     ]),
   ]));
   mount(s);
+  bgImage(s, 'assets/ui/title.webp');
   Game.screen = 'title';
   syncDebug();
 }
@@ -103,7 +104,7 @@ function pickCard(kind, item, tagline, onclick) {
     dataset:{ testid:`pick-${kind}-${item.id}`, id:item.id },
     onclick,
   }, [
-    el('span.emoji', {}, iconEl(item.id)),
+    el('span.emoji', {}, artOrFallback(`assets/portraits/${item.id}.webp`, iconEl(item.id))),
     el('span.name', {}, item.name),
     el('span.tagline', {}, tagline),
     el('span.blurb', {}, item.blurb),

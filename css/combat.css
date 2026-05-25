@@ -1,6 +1,24 @@
 /* ===================== COMBAT ===================== */
 .combat { flex:1; min-height:0; display:flex; flex-direction:column; gap:.5rem; }
 
+/* atmospheric scene behind the fight (AI bg drops into .has-bg) */
+.screen.combat { position:relative; }
+.combat-scene { position:absolute; inset:0; z-index:0; pointer-events:none; border-radius:14px; overflow:hidden;
+  background:
+    radial-gradient(130% 62% at 50% 6%, rgba(150,90,220,.30), transparent 56%),
+    radial-gradient(80% 42% at 50% 30%, rgba(96,165,250,.10), transparent 70%),
+    radial-gradient(100% 55% at 50% 102%, rgba(8,6,20,.95), transparent 72%),
+    linear-gradient(180deg,#0c1030 0%, #15103a 48%, #241640 100%); }
+.combat-scene.has-bg { background-size:cover; background-position:center; }
+.combat-scene::after { content:""; position:absolute; inset:0; box-shadow:inset 0 0 130px 36px rgba(5,6,18,.78); }
+.combat-top, .enemies, .player-panel, .hand-wrap, .combat-foot { position:relative; z-index:1; }
+
+/* enemy stage: shadow + glow + slow idle float */
+@keyframes mw-idle { 50% { transform:translateY(-4px); } }
+.enemy { position:relative; }
+.enemy::after { content:""; position:absolute; left:50%; top:128px; transform:translateX(-50%);
+  width:70px; height:15px; border-radius:50%; background:radial-gradient(closest-side, rgba(0,0,0,.55), transparent); z-index:-1; }
+
 /* relic + potion bar */
 .combat-top { flex:0 0 auto; display:flex; justify-content:space-between; align-items:center; gap:.5rem; min-height:34px; }
 .relic-row, .potion-row { display:flex; gap:.35rem; align-items:center; }
@@ -88,6 +106,16 @@
 .card:not(.disabled):active { transform:translateY(-4px) scale(1.02); }
 .card.sel { transform:translateY(-12px) scale(1.05); box-shadow:0 0 0 2px var(--violet-bright), 0 10px 22px rgba(0,0,0,.6); }
 .card.disabled { opacity:.5; filter:saturate(.6); }
+
+/* --- premium polish: enemy portrait glow/float + richer card frames --- */
+.enemy .portrait { box-shadow:0 0 0 1px var(--line), 0 10px 26px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08), 0 0 30px rgba(150,90,220,.42); animation:mw-idle 3.4s ease-in-out infinite; }
+.card { background:linear-gradient(170deg,#f4ecd9,#dcc9ac 68%,#cdb892);
+  box-shadow:0 7px 16px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.4), inset 0 -12px 20px rgba(120,100,70,.28); overflow:hidden; }
+.card::before { content:""; position:absolute; left:0; right:0; top:0; height:5px; background:var(--ct,#7c6a4e); box-shadow:0 0 8px var(--ct,#7c6a4e); }
+.card[data-type="attack"]{ --ct:#c0563a; } .card[data-type="skill"]{ --ct:#3f7fb8; }
+.card[data-type="power"]{ --ct:#8a4fb8; } .card[data-type="curse"]{ --ct:#6b4a7a; }
+.card .cname { color:#2a1d10; padding-top:2px; } .card .ctype { color:var(--ct); opacity:.95; font-weight:700; }
+.card .ctext { color:#3a2c18; }
 
 /* footer */
 .combat-foot { flex:0 0 auto; display:flex; align-items:center; gap:.6rem; padding-top:.3rem; }

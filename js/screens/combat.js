@@ -10,7 +10,7 @@ import * as FX from '../fx.js';
 import { Audio } from '../audio.js';
 import { openDeckViewer, openCodex } from './qol.js';
 import { iconEl } from '../icons.js';
-import { artOrFallback } from '../art.js';
+import { artOrFallback, bgImage } from '../art.js';
 
 let C, ui, selUid = null, targeting = false, pending = [], cbWin, cbLose;
 
@@ -25,6 +25,7 @@ export function startCombat({ rng, player, enemyIds, onWin, onLose }) {
     onBlock:  (e) => e.amount > 0 && pending.push({ t: 'blk', uid: idOf(e.entity), amount: e.amount }),
     onHeal:   (e) => e.amount > 0 && pending.push({ t: 'heal', uid: idOf(e.entity), amount: e.amount }),
     onTurnStart: (e) => e.who === 'player' && pending.push({ t: 'turn' }),
+    onDeath:  (e) => e.target && !e.target.isPlayer && pending.push({ t: 'death', uid: e.target.uid }),
     onEnd:    (e) => pending.push({ t: 'end', result: e.result }),
   };
   C = new Combat({ rng, player, enemyIds, hooks });
@@ -38,14 +39,16 @@ export function startCombat({ rng, player, enemyIds, onWin, onLose }) {
 function buildShell() {
   const s = screen('combat');
   ui = {
+    scene:   el('div.combat-scene', { 'aria-hidden': 'true' }),
     topbar:  el('div.combat-top', { dataset: { testid: 'topbar' } }),
     enemies: el('div.enemies', { dataset: { testid: 'enemies' } }),
     player:  el('div.player-panel', { dataset: { testid: 'player' } }),
     hand:    el('div.hand', { dataset: { testid: 'hand' } }),
     foot:    el('div.combat-foot'),
   };
-  s.append(ui.topbar, ui.enemies, ui.player, el('div.hand-wrap', {}, [ui.hand]), ui.foot);
+  s.append(ui.scene, ui.topbar, ui.enemies, ui.player, el('div.hand-wrap', {}, [ui.hand]), ui.foot);
   mount(s);
+  bgImage(ui.scene, 'assets/backgrounds/combat.webp');
   ui.root = s;
 }
 
@@ -208,11 +211,17 @@ function flush() {
       const tgt = elFor(ev.uid);
       FX.floatText(tgt, '-' + ev.amount, { color: ev.poison ? '#84cc5a' : '#ff6b6b' });
       FX.hitFlash(tgt);
+      FX.burst(tgt, { color: ev.poison ? '#84cc5a' : '#ff7a5a', n: 9 });
       if (ev.uid === 'player') FX.screenShake(6);
     } else if (ev.t === 'blk') {
       FX.floatText(elFor(ev.uid), '+' + ev.amount, { color: '#9ec5ff', up: 44 });
+      FX.burst(elFor(ev.uid), { color: '#8fb6ff', n: 5, spread: 30 });
     } else if (ev.t === 'heal') {
       FX.floatText(elFor(ev.uid), '+' + ev.amount, { color: '#34d399', up: 44 });
+      FX.burst(elFor(ev.uid), { color: '#46d39a', n: 5, spread: 30 });
+    } else if (ev.t === 'death') {
+      FX.burst(elFor(ev.uid), { color: '#d9c7ff', n: 18, spread: 72, size: 7 });
+      FX.screenShake(4);
     } else if (ev.t === 'turn') { turn = true; }
     else if (ev.t === 'end') { ended = ev.result; }
   }

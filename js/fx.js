@@ -50,3 +50,21 @@ export function dealIn(cards) {
 }
 
 export function screenShake(mag = 5) { shake(document.getElementById('app'), mag); }
+
+/** A burst of sparks from an element's centre (hit / block / heal / death). */
+export function burst(targetEl, { color = '#ff7a5a', n = 10, spread = 48, size = 6 } = {}) {
+  if (!targetEl || reduced()) return;
+  const r = targetEl.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const layer = fxLayer();
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('div');
+    p.className = 'spark';
+    p.style.cssText = `left:${cx}px;top:${cy}px;width:${size}px;height:${size}px;background:${color};box-shadow:0 0 8px ${color}`;
+    layer.appendChild(p);
+    const a = Math.random() * Math.PI * 2, d = spread * (0.35 + Math.random() * 0.85);
+    if (g()) g().to(p, { x: Math.cos(a) * d, y: Math.sin(a) * d - spread * 0.2, opacity: 0, scale: 0.3,
+      duration: 0.42 + Math.random() * 0.3, ease: 'power2.out', onComplete: () => p.remove() });
+    else setTimeout(() => p.remove(), 650);
+  }
+}
