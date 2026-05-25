@@ -7,8 +7,29 @@
     linear-gradient(160deg, #0c1130, #161a3c 60%, #241640); }
 .world { position:absolute; left:0; top:0; will-change:transform; }
 
+/* biome bands (town → woods → ruins) */
+.world .band { position:absolute; left:0; right:0; pointer-events:none; z-index:0; }
+.band.town  { background:linear-gradient(180deg, rgba(36,54,40,0), rgba(32,50,38,.4)); }
+.band.woods { background:linear-gradient(180deg, rgba(30,22,60,0), rgba(42,26,74,.42) 50%, rgba(30,22,60,0)); }
+.band.ruins { background:linear-gradient(180deg, rgba(64,32,86,.5), rgba(40,24,60,.08)); }
+
+/* trail through the nodes */
+.trail { position:absolute; left:0; top:0; z-index:0; pointer-events:none; }
+.trail-line { fill:none; stroke:rgba(201,166,255,.4); stroke-width:6; stroke-linecap:round; stroke-dasharray:2 17;
+  filter:drop-shadow(0 0 4px rgba(168,85,247,.5)); }
+
+/* scenery props */
+.prop { position:absolute; width:48px; height:48px; pointer-events:none; z-index:1; filter:drop-shadow(0 3px 4px rgba(0,0,0,.5)); }
+.prop .ico { width:100%; height:100%; }
+.prop.veg { color:#5f7d57; } .prop.stone { color:#8d88a3; }
+
+/* edge vignette over the field */
+.viewport::after { content:""; position:absolute; inset:0; pointer-events:none; border-radius:14px;
+  box-shadow:inset 0 0 130px 44px rgba(6,8,22,.7); z-index:2; }
+
 .poi { position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center;
-  gap:.2rem; width:92px; text-align:center; }
+  gap:.2rem; width:92px; text-align:center; z-index:3; }
+.poi[data-type="treasure"] .poi-icon { border-color:var(--gold); box-shadow:0 0 16px rgba(212,175,151,.5); }
 .poi-icon { width:56px; height:56px; border-radius:16px; display:grid; place-items:center; font-size:1.8rem;
   background:radial-gradient(circle at 50% 35%, rgba(168,85,247,.4), rgba(20,26,58,.92));
   border:1px solid var(--line); box-shadow:0 4px 14px rgba(0,0,0,.45); }

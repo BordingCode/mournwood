@@ -126,6 +126,21 @@ export function openWard(run, { back }) {
   mount(s);
 }
 
+/* ---------------- hidden cache ---------------- */
+export function openTreasure(run, { back }) {
+  const gold = rng().int(25, 45); run.gold += gold;
+  let relicLine = '';
+  if (rng().chance(0.5)) {
+    const u = RELIC_LIST.filter((r) => !run.relics.includes(r.id));
+    if (u.length) { const r = rng().pick(u); run.relics.push(r.id); relicLine = ` You also pry loose a relic: ${r.name}.`; }
+  }
+  const s = screen('node');
+  s.append(head('Hidden Cache'),
+    el('p.event-text', {}, `Tucked off the trail beneath ash-choked roots, a buried chest. You gain ${gold} gold.${relicLine}`),
+    el('nav.menu', {}, [el('button.btn.btn-primary', { dataset: { testid: 'btn-treasure' }, onclick: back }, 'Take it')]));
+  mount(s);
+}
+
 /* ---------------- ending / defeat ---------------- */
 export function openEnding(run, { toTitle }) {
   const s = screen('result-screen win');

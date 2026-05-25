@@ -83,6 +83,15 @@ export const ICONS = {
   flask: '<path d="M10 3h4M11 3v5l-4 8.2A3 3 0 0 0 9.7 21h4.6a3 3 0 0 0 2.7-4.8L13 8V3"/><path d="M8.6 15.2h6.8"/>',
   cards: '<rect x="3.5" y="6" width="10" height="14" rx="1.6" transform="rotate(-9 8.5 13)"/><rect x="10" y="4" width="10" height="14" rx="1.6" transform="rotate(7 15 11)"/>',
   scroll: '<path d="M7 4h9a2 2 0 0 1 2 2v10a3 3 0 0 1-3 3H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M5 6a2 2 0 0 0 2 2h1"/><path d="M9 9h6M9 12h6M9 15h4"/>',
+  chest: '<rect x="4" y="9" width="16" height="10.5" rx="1.5"/><path d="M4 13h16M4 9.5C4 7 6.5 6 12 6s8 1 8 3.5"/><rect x="10.4" y="11.6" width="3.2" height="3.2" rx=".6" fill="currentColor" stroke="none"/>',
+  npc: '<circle cx="11" cy="7.5" r="3"/><path d="M5 20c0-3.4 2.7-6 6-6s6 2.6 6 6"/><path d="M18 4l.6 1.6L20 6.2l-1.4.6L18 8.4l-.6-1.6L16 6.2l1.4-.6z" fill="currentColor" stroke="none"/>',
+
+  /* ---- map scenery (decorative, non-colliding) ---- */
+  tree: '<path d="M12 3c-3.4 0-6 2.6-6 5.6 0 2.1 1.3 3.5 3 4.3-2 .4-3.5 1.4-3.5 2.8 0 1.6 2.9 2.1 6.5 2.1s6.5-.5 6.5-2.1c0-1.4-1.5-2.4-3.5-2.8 1.7-.8 3-2.2 3-4.3C18 5.6 15.4 3 12 3z" fill="currentColor" stroke="none"/><path d="M12 16v6"/>',
+  pine: '<path d="M12 3l4 6h-2.6l3 4.6h-2.8L17 19H7l3.4-5.4H7.6L10.6 9H8z" fill="currentColor" stroke="none"/><path d="M12 19v3"/>',
+  rock: '<path d="M4.5 18.5c0-3 2-6 5-6 2 0 3 1 4 2.6 1-.6 2.5-.2 3.5 1 .8 1 .5 2.4-1 2.4H6c-1 0-1.5-.4-1.5-1z" fill="currentColor" stroke="none"/>',
+  pillar: '<path d="M8 5h8M7 19h10v2.4H7zM9 5.5v13M15 5.5v13"/><path d="M8.5 10h7M8.5 14h7"/>',
+  grave: '<path d="M7.5 21V10a4.5 4.5 0 0 1 9 0v11z"/><path d="M9.5 9.5h5M12 7v5"/>',
 };
 
 export function iconSvg(name) {

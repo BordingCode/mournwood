@@ -68,7 +68,24 @@ export function makeRegion(mode, rng) {
   // boss gate at the top, locked until the Ward-Stone is recovered
   pois.push({ id: 'boss', type: 'boss', name: 'The Sanctum', icon: '☠️', x: W / 2, y: 120, locked: true });
 
-  return { W, H, spawn, pois, heroR: HERO_R };
+  // a hidden cache off the main trail (rewards exploring)
+  const tx = rng.chance(0.5) ? rng.int(150, 250) : rng.int(W - 250, W - 150);
+  pois.push({ id: 'treasure', type: 'treasure', name: 'Hidden Cache', secret: true, x: tx, y: Math.round(H * 0.5) + rng.int(-50, 50) });
+
+  // decorative scenery (non-colliding), themed by vertical biome band: ruins (top)→woods→town (bottom)
+  const scenery = [];
+  for (let i = 0, n = Math.floor(H / 70); i < n; i++) {
+    const y = rng.int(70, H - 70);
+    const x = rng.int(60, W - 60);
+    if (pois.some((p) => Math.hypot(p.x - x, p.y - y) < 95)) continue;
+    const f = y / H;
+    const pool = f < 0.34 ? ['pillar', 'grave', 'rock', 'pillar', 'grave']
+               : f < 0.72 ? ['pine', 'tree', 'rock', 'pine', 'grave']
+               : ['tree', 'tree', 'rock', 'pine'];
+    scenery.push({ x, y, type: rng.pick(pool), scale: 0.8 + rng.next() * 1.0, dim: 0.22 + rng.next() * 0.32 });
+  }
+
+  return { W, H, spawn, pois, scenery, heroR: HERO_R };
 }
 
 function nodeName(t) { return ({ combat: 'Wilds', elite: 'Elite Foe', shop: 'Wandering Merchant', rest: 'Campfire', event: 'Mystery', ward: 'Sunken Chapel' })[t] || t; }

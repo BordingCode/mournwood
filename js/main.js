@@ -8,7 +8,7 @@ import { startCombat } from './screens/combat.js';
 import { createRun, combatant, encounterFor, goldReward } from './run.js';
 import { openMap } from './screens/map.js';
 import { openHub } from './screens/hub.js';
-import { openReward, openShop, openRest, openEvent, openWard, openEnding, openDefeat } from './screens/nodes.js';
+import { openReward, openShop, openRest, openEvent, openWard, openTreasure, openEnding, openDefeat } from './screens/nodes.js';
 import { saveRun, loadRun, hasAny, clearSlot } from './save.js';
 import { openSaves } from './screens/saves.js';
 import { openSettings, applySettings } from './settings.js';
@@ -155,6 +155,7 @@ function resolveNode(poi) {
   else if (poi.type === 'rest') openRest(run, { back });
   else if (poi.type === 'event') openEvent(run, { back });
   else if (poi.type === 'ward') openWard(run, { back });
+  else if (poi.type === 'treasure') openTreasure(run, { back });
 }
 
 function startNodeCombat(poi) {

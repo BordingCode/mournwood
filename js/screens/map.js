@@ -7,7 +7,8 @@ import { bossUnlocked } from '../run.js';
 import { iconEl } from '../icons.js';
 import { artOrFallback } from '../art.js';
 
-const POI_ICON = { hub:'hub', combat:'combat', elite:'skeleton', shop:'shop', rest:'rest', event:'event', ward:'ward', boss:'boss' };
+const POI_ICON = { hub:'hub', combat:'combat', elite:'skeleton', shop:'shop', rest:'rest', event:'event', ward:'ward', boss:'boss', treasure:'chest' };
+const SVGNS = 'http://www.w3.org/2000/svg';
 
 const SPEED = 270;          // px / second
 const INTERACT_R = 82;
@@ -35,10 +36,30 @@ function build() {
   const R = run.region;
 
   world = el('div.world', { style: { width: R.W + 'px', height: R.H + 'px' } });
-  // decorative ground tufts (non-colliding)
-  for (const p of R.pois) {
-    if (p.type === 'hub' || p.type === 'boss') continue;
+
+  // biome bands (bottom→top: town → woods → ruins)
+  world.appendChild(el('div.band.town',  { style: { top: (R.H * 0.66) + 'px', height: (R.H * 0.34) + 'px' } }));
+  world.appendChild(el('div.band.woods', { style: { top: (R.H * 0.30) + 'px', height: (R.H * 0.36) + 'px' } }));
+  world.appendChild(el('div.band.ruins', { style: { top: '0px', height: (R.H * 0.30) + 'px' } }));
+
+  // the trail: a dashed line through the main POIs (bottom→top)
+  const trailPts = R.pois.filter((p) => p.type !== 'treasure').slice().sort((a, b) => b.y - a.y)
+    .map((p) => `${p.x},${p.y}`).join(' ');
+  const svg = document.createElementNS(SVGNS, 'svg');
+  svg.setAttribute('class', 'trail'); svg.setAttribute('width', R.W); svg.setAttribute('height', R.H);
+  svg.setAttribute('viewBox', `0 0 ${R.W} ${R.H}`);
+  const poly = document.createElementNS(SVGNS, 'polyline');
+  poly.setAttribute('points', trailPts); poly.setAttribute('class', 'trail-line');
+  svg.appendChild(poly); world.appendChild(svg);
+
+  // decorative scenery (non-colliding), behind POIs
+  for (const sc of R.scenery || []) {
+    const veg = sc.type === 'tree' || sc.type === 'pine';
+    world.appendChild(el('div.prop.' + (veg ? 'veg' : 'stone'), {
+      style: { left: sc.x + 'px', top: sc.y + 'px', opacity: String(sc.dim),
+        transform: `translate(-50%,-88%) scale(${sc.scale})` } }, iconEl(sc.type)));
   }
+
   // POIs
   for (const p of R.pois) {
     const cleared = !!run.cleared[p.id];
@@ -129,7 +150,7 @@ function updateNear() {
     syncDebug();
   }
 }
-function interactLabel(t) { return ({ combat: 'Fight', elite: 'Fight Elite', shop: 'Trade', rest: 'Rest', event: 'Investigate', ward: 'Enter', boss: 'Confront' })[t] || 'Enter'; }
+function interactLabel(t) { return ({ combat: 'Fight', elite: 'Fight Elite', shop: 'Trade', rest: 'Rest', event: 'Investigate', ward: 'Enter', boss: 'Confront', treasure: 'Open' })[t] || 'Enter'; }
 
 function doInteract() {
   if (!near) return;
