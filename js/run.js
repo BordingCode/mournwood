@@ -72,6 +72,15 @@ export function makeRegion(mode, rng) {
   const tx = rng.chance(0.5) ? rng.int(150, 250) : rng.int(W - 250, W - 150);
   pois.push({ id: 'treasure', type: 'treasure', name: 'Hidden Cache', secret: true, x: tx, y: Math.round(H * 0.5) + rng.int(-50, 50) });
 
+  // ally NPCs along the wood (walk up to talk; once-per-run perks)
+  const NPC_LABEL = { bryn: 'Bryn', sable: 'Mother Sable', corvin: 'Corvin' };
+  const npcPlan = quick ? [['sable', 0.82], ['bryn', 0.5]] : [['sable', 0.85], ['bryn', 0.55], ['corvin', 0.24]];
+  for (const [id, fy] of npcPlan) {
+    let x = W / 2 + (rng.chance(0.5) ? -1 : 1) * rng.int(170, 290);
+    x = Math.max(150, Math.min(W - 150, x));
+    pois.push({ id: 'npc_' + id, type: 'npc', npc: id, name: NPC_LABEL[id], x, y: Math.round(H * fy) });
+  }
+
   // decorative scenery (non-colliding), themed by vertical biome band: ruins (top)→woods→town (bottom)
   const scenery = [];
   for (let i = 0, n = Math.floor(H / 70); i < n; i++) {

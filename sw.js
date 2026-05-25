@@ -1,5 +1,5 @@
 /* Mournwood service worker — network-first (fresh code online, full offline fallback). */
-const CACHE = 'mournwood-v3';
+const CACHE = 'mournwood-v4';
 const SHELL = [
   './',
   'index.html',
@@ -13,6 +13,7 @@ const SHELL = [
   'js/settings.js',
   'js/art.js',
   'js/icons.js',
+  'js/story.js',
   'assets/manifest.json',
   'js/screens/map.js',
   'js/screens/hub.js',

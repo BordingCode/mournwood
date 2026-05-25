@@ -7,7 +7,7 @@ import { bossUnlocked } from '../run.js';
 import { iconEl } from '../icons.js';
 import { artOrFallback } from '../art.js';
 
-const POI_ICON = { hub:'hub', combat:'combat', elite:'skeleton', shop:'shop', rest:'rest', event:'event', ward:'ward', boss:'boss', treasure:'chest' };
+const POI_ICON = { hub:'hub', combat:'combat', elite:'skeleton', shop:'shop', rest:'rest', event:'event', ward:'ward', boss:'boss', treasure:'chest', npc:'npc' };
 const SVGNS = 'http://www.w3.org/2000/svg';
 
 const SPEED = 270;          // px / second
@@ -150,7 +150,7 @@ function updateNear() {
     syncDebug();
   }
 }
-function interactLabel(t) { return ({ combat: 'Fight', elite: 'Fight Elite', shop: 'Trade', rest: 'Rest', event: 'Investigate', ward: 'Enter', boss: 'Confront', treasure: 'Open' })[t] || 'Enter'; }
+function interactLabel(t) { return ({ combat: 'Fight', elite: 'Fight Elite', shop: 'Trade', rest: 'Rest', event: 'Investigate', ward: 'Enter', boss: 'Confront', treasure: 'Open', npc: 'Talk' })[t] || 'Enter'; }
 
 function doInteract() {
   if (!near) return;

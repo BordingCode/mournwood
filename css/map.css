@@ -30,6 +30,7 @@
 .poi { position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center;
   gap:.2rem; width:92px; text-align:center; z-index:3; }
 .poi[data-type="treasure"] .poi-icon { border-color:var(--gold); box-shadow:0 0 16px rgba(212,175,151,.5); }
+.poi[data-type="npc"] .poi-icon { border-color:var(--arcane-blue); box-shadow:0 0 16px rgba(96,165,250,.5); }
 .poi-icon { width:56px; height:56px; border-radius:16px; display:grid; place-items:center; font-size:1.8rem;
   background:radial-gradient(circle at 50% 35%, rgba(168,85,247,.4), rgba(20,26,58,.92));
   border:1px solid var(--line); box-shadow:0 4px 14px rgba(0,0,0,.45); }

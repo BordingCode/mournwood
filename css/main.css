@@ -126,6 +126,21 @@ body::before {
 .shop-info .blurb { display:block; font-size:.7rem; color:var(--text-dim); }
 .result-screen { flex:1; display:flex; }
 
+/* ---------------- dialogue ---------------- */
+.dialogue { position:fixed; inset:0; z-index:88; display:flex; align-items:flex-end; justify-content:center;
+  padding:0 12px; background:rgba(5,7,20,.5); backdrop-filter:blur(2px); pointer-events:auto; }
+.dlg-box { width:min(520px,94vw); margin-bottom:13vh; padding:1rem; border-radius:16px;
+  background:linear-gradient(180deg, rgba(35,22,64,.98), rgba(16,20,48,.98)); border:1px solid var(--line);
+  box-shadow:0 -8px 40px rgba(0,0,0,.6), 0 0 30px rgba(125,63,184,.28); animation:fade .25s ease; }
+.dlg-head { display:flex; align-items:center; gap:.6rem; margin-bottom:.6rem; }
+.dlg-portrait { width:44px; height:44px; border-radius:12px; display:grid; place-items:center; color:var(--violet-glow);
+  background:radial-gradient(circle at 50% 35%, rgba(168,85,247,.4), rgba(20,26,58,.95)); border:1px solid var(--line); }
+.dlg-portrait .ico { width:62%; height:62%; }
+.dlg-name { font-family:var(--f-head); font-weight:700; color:var(--parchment); letter-spacing:.04em; }
+.dlg-text { color:var(--text); line-height:1.55; min-height:3.4em; margin-bottom:.8rem; }
+.dlg-actions { display:flex; flex-wrap:wrap; gap:.5rem; justify-content:flex-end; }
+.codex-row.done b { color:var(--gold); }
+
 /* ---------------- settings ---------------- */
 .set-row { display:flex; align-items:center; gap:.7rem; padding:.55rem .4rem; border-bottom:1px solid var(--line); }
 .set-row > span:first-child { flex:1; }

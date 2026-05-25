@@ -15,6 +15,7 @@ import { openSettings, applySettings } from './settings.js';
 import { openDeckViewer } from './screens/qol.js';
 import { iconEl } from './icons.js';
 import { loadArtManifest, bgImage, artOrFallback } from './art.js';
+import { maybeBeat, openNPC, openQuestLog } from './story.js';
 
 /* ---------------- boot ---------------- */
 function boot() {
@@ -144,6 +145,7 @@ function openWorld() {
   saveRun(Game.run);
   Game.screen = 'map';
   openMap(Game.run, { onNode: resolveNode, onMenu: openPause });
+  maybeBeat(Game.run); // surface the next story beat over the map
 }
 
 function resolveNode(poi) {
@@ -156,6 +158,7 @@ function resolveNode(poi) {
   else if (poi.type === 'event') openEvent(run, { back });
   else if (poi.type === 'ward') openWard(run, { back });
   else if (poi.type === 'treasure') openTreasure(run, { back });
+  else if (poi.type === 'npc') openNPC(run, poi.npc, { back });
 }
 
 function startNodeCombat(poi) {
@@ -195,6 +198,7 @@ function openPause() {
     el('nav.menu', {}, [
       el('button.btn.btn-primary', { onclick: () => { ov.remove(); openWorld(); } }, 'Resume'),
       el('button.btn', { onclick: () => openDeckViewer('Your Deck', Game.run.deck) }, 'View Deck'),
+      el('button.btn', { onclick: () => openQuestLog(Game.run) }, 'Quests'),
       el('button.btn', { onclick: () => { ov.remove(); openSettings(openWorld); } }, 'Settings'),
       el('button.btn.btn-ghost', { onclick: () => { ov.remove(); go('title'); } }, 'Abandon run'),
     ]),
