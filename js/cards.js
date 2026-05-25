@@ -157,7 +157,27 @@ export const CARDS = {
     text:'Deal 5 damage. Apply 5 Poison.', effects:[{ k:'damage', amount:5 }, { k:'status', status:'poison', amount:5, to:'target' }] },
   sig_stone_endurance:{ id:'sig_stone_endurance', name:'Stone Endurance', type:'skill', cost:1, rarity:'signature', target:'self',
     text:'Gain 10 Block and 1 Dexterity.', effects:[{ k:'block', amount:10 }, { k:'status', status:'dexterity', amount:1, to:'self' }] },
+
+  /* ---------------- neutral reward-pool commons (any class) ---------------- */
+  heavy_strike:{ id:'heavy_strike', name:'Heavy Strike', type:'attack', cost:2, rarity:'common', target:'enemy',
+    text:'Deal 9 damage.', effects:[{ k:'damage', amount:9 }] },
+  iron_wave:{ id:'iron_wave', name:'Iron Wave', type:'attack', cost:1, rarity:'common', target:'enemy',
+    text:'Deal 5 damage. Gain 5 Block.', effects:[{ k:'damage', amount:5 }, { k:'block', amount:5 }] },
+  precise_strike:{ id:'precise_strike', name:'Precise Strike', type:'attack', cost:1, rarity:'common', target:'enemy',
+    text:'Deal 7 damage.', effects:[{ k:'damage', amount:7 }] },
+  bulwark:{ id:'bulwark', name:'Bulwark', type:'skill', cost:1, rarity:'common', target:'self',
+    text:'Gain 8 Block.', effects:[{ k:'block', amount:8 }] },
+  quick_step:{ id:'quick_step', name:'Quick Step', type:'skill', cost:0, rarity:'common', target:'self',
+    text:'Gain 3 Block. Draw 1.', effects:[{ k:'block', amount:3 }, { k:'draw', amount:1 }] },
+  toxic_dart:{ id:'toxic_dart', name:'Toxic Dart', type:'attack', cost:1, rarity:'common', target:'enemy',
+    text:'Deal 3 damage. Apply 3 Poison.', effects:[{ k:'damage', amount:3 }, { k:'status', status:'poison', amount:3, to:'target' }] },
+  rally:{ id:'rally', name:'Rally', type:'skill', cost:1, rarity:'common', target:'self',
+    text:'Gain 5 Block. Draw 1.', effects:[{ k:'block', amount:5 }, { k:'draw', amount:1 }] },
+  empower:{ id:'empower', name:'Empower', type:'power', cost:1, rarity:'common', target:'self',
+    text:'Gain 1 Strength.', effects:[{ k:'status', status:'strength', amount:1, to:'self' }] },
 };
+
+export const REWARD_POOL = ['heavy_strike','iron_wave','precise_strike','bulwark','quick_step','toxic_dart','rally','empower'];
 
 export const STARTER_DECKS = {
   fighter:  ['f_strike','f_strike','f_strike','f_defend','f_defend','f_defend','f_shield_bash','f_shield_bash','f_brace','f_barricade'],

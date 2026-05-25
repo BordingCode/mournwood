@@ -4,8 +4,11 @@ import { el, mount, screen, hideSplash } from './ui.js';
 import { Game, syncDebug } from './state.js';
 import { CLASSES, CLASS_BY_ID } from './data/classes.js';
 import { RACES, RACE_BY_ID } from './data/races.js';
-import { buildDeck } from './cards.js';
 import { startCombat } from './screens/combat.js';
+import { createRun, combatant, encounterFor, goldReward } from './run.js';
+import { openMap } from './screens/map.js';
+import { openHub } from './screens/hub.js';
+import { openReward, openShop, openRest, openEvent, openWard, openEnding, openDefeat } from './screens/nodes.js';
 
 /* ---------------- boot ---------------- */
 function boot() {
@@ -21,7 +24,6 @@ export function go(name) {
   Game.screen = name;
   if (name === 'title') routeTitle();
   else if (name === 'select') routeSelect();
-  else if (name === 'hub') routeHubStub();
   syncDebug();
 }
 
@@ -104,56 +106,73 @@ function markSel(grid, id) {
   [...grid.children].forEach((c) => c.classList.toggle('sel', c.dataset.id === id));
 }
 
+/* ---------------- run loop ---------------- */
 function startAdventure() {
   const { raceId, classId } = Game.selection;
   if (!raceId || !classId) return;
-  // Phase 4 routes combat through the map; for now Begin drops into a test encounter
-  // so the combat core is fully playable.
-  startEncounter();
+  openHub({ race: raceId, cls: classId }, { onVenture: startRun });
 }
 
-// Builds the player from the chosen race+class and launches a combat.
-function startEncounter() {
-  const c = CLASS_BY_ID[Game.selection.classId];
-  const r = RACE_BY_ID[Game.selection.raceId];
-  const maxHp = c.hp + (r.id === 'human' ? 5 : 0); // run-level race bonus
-  const player = {
-    name: `${r.name} ${c.name}`,
-    raceId: r.id,
-    maxHp, hp: maxHp,
-    deck: buildDeck(c.id, r.id),
-    relics: ['ashen_idol'],            // a starter relic so the run has identity
-    potions: ['heal_draught'],         // one starter potion
-    statuses: {},
-  };
-  const pack = Game.rng.chance(0.5) ? ['goblin', 'goblin'] : ['goblin', 'bandit'];
-  Game.screen = 'combat';
-  syncDebug();
+function startRun(mode) {
+  Game.run = createRun({ race: Game.selection.raceId, cls: Game.selection.classId, mode, rng: Game.rng });
+  openWorld();
+}
+
+function openWorld() {
+  Game.screen = 'map';
+  openMap(Game.run, { onNode: resolveNode, onMenu: openPause });
+}
+
+function resolveNode(poi) {
+  const run = Game.run;
+  const back = () => { run.cleared[poi.id] = true; openWorld(); };
+  if (poi.type === 'combat' || poi.type === 'elite') startNodeCombat(poi);
+  else if (poi.type === 'boss') startBossCombat(poi);
+  else if (poi.type === 'shop') openShop(run, { back });
+  else if (poi.type === 'rest') openRest(run, { back });
+  else if (poi.type === 'event') openEvent(run, { back });
+  else if (poi.type === 'ward') openWard(run, { back });
+}
+
+function startNodeCombat(poi) {
+  const run = Game.run;
+  Game.screen = 'combat'; syncDebug();
   startCombat({
-    rng: Game.rng,
-    player,
-    enemyIds: pack,
-    onWin: () => go('hub'),
-    onLose: () => go('title'),
+    rng: Game.rng, player: combatant(run), enemyIds: encounterFor(poi, Game.rng),
+    onWin: (hp) => { run.hp = hp; run.gold += goldReward(poi, Game.rng); run.cleared[poi.id] = true;
+      openReward(run, { back: openWorld, elite: poi.type === 'elite' }); },
+    onLose: startDefeat,
   });
 }
 
-/* ---------------- temporary hub stub (until Phase 4) ---------------- */
-function routeHubStub() {
-  const r = RACE_BY_ID[Game.selection.raceId], c = CLASS_BY_ID[Game.selection.classId];
-  const s = screen('title');
-  s.append(el('div.title-wrap', {}, [
-    el('div.game-title', { style:{ fontSize:'2rem' } }, 'Hearthvale'),
-    el('p.game-tag', {}, 'the vale of Aldermoor'),
-    el('p', { style:{ color:'var(--text-dim)', maxWidth:'30ch' } },
-      `${r.emoji} ${r.name} ${c.name} — your adventure begins here. (Hub, map & combat arrive in the next build phases.)`),
+function startBossCombat(poi) {
+  const run = Game.run;
+  Game.screen = 'combat'; syncDebug();
+  startCombat({
+    rng: Game.rng, player: combatant(run), enemyIds: ['high_priest'],
+    onWin: (hp) => { run.hp = hp; run.cleared.boss = true; openEnding(run, { toTitle: () => go('title') }); },
+    onLose: startDefeat,
+  });
+}
+
+function startDefeat() {
+  openDefeat(Game.run, { restart: () => {
+    const { race, cls, mode } = Game.run;
+    Game.run = createRun({ race, cls, mode, rng: Game.rng });
+    openWorld();
+  } });
+}
+
+// lightweight pause overlay from the map's ☰
+function openPause() {
+  const ov = el('div.result', { dataset: { testid: 'pause' } }, [
+    el('h2', { style: { fontSize: '1.7rem', color: 'var(--parchment)' } }, 'Paused'),
     el('nav.menu', {}, [
-      el('button.btn.btn-ghost', { dataset:{ testid:'btn-tohub-back' }, onclick:() => go('title') }, '‹ Main Menu'),
+      el('button.btn.btn-primary', { onclick: () => { ov.remove(); openWorld(); } }, 'Resume'),
+      el('button.btn.btn-ghost', { onclick: () => { ov.remove(); go('title'); } }, 'Abandon run'),
     ]),
-  ]));
-  mount(s);
-  Game.screen = 'hub';
-  syncDebug();
+  ]);
+  document.getElementById('fx-layer').appendChild(ov);
 }
 
 boot();

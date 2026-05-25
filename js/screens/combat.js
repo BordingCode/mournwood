@@ -23,6 +23,7 @@ export function startCombat({ rng, player, enemyIds, onWin, onLose }) {
     onEnd:    (e) => pending.push({ t: 'end', result: e.result }),
   };
   C = new Combat({ rng, player, enemyIds, hooks });
+  window.__combat = C; // test/debug hook
   buildShell();
   C.start();
   renderBoard();
@@ -214,7 +215,7 @@ function showResult(result) {
   const overlay = el('div.result.' + result, { dataset: { testid: 'result' } }, [
     el('h2', {}, result === 'win' ? 'Victory' : 'Defeat'),
     el('button.btn.btn-primary', { dataset: { testid: 'btn-result' },
-      onclick: () => { overlay.remove(); (result === 'win' ? cbWin : cbLose)?.(); } },
+      onclick: () => { overlay.remove(); (result === 'win' ? cbWin : cbLose)?.(C.player.hp); } },
       result === 'win' ? 'Continue' : 'Return'),
   ]);
   document.getElementById('fx-layer').appendChild(overlay);

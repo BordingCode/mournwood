@@ -35,9 +35,10 @@ export function mount(node) {
   return node;
 }
 
-/** Build a standard .screen wrapper. */
+/** Build a standard .screen wrapper. Accepts space-separated extra classes. */
 export function screen(className = '') {
-  return el('section.screen' + (className ? '.' + className : ''));
+  const cls = className.trim().split(/\s+/).filter(Boolean).map((c) => '.' + c).join('');
+  return el('section.screen' + cls);
 }
 
 export function hideSplash() {
