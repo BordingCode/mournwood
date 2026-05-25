@@ -21,6 +21,8 @@ export const STATUSES = {
   // class scaling stats (used by op-level `scale`) + engine-handled markers
   rage:       { name:'Rage',       icon:'🔥', color:'#e0653b', kind:'buff',
                 desc:'Rage cards deal +X damage.' },
+  momentum:   { name:'Momentum',   icon:'🌀', color:'#8ad17f', kind:'buff', decays:true,
+                desc:'Combo cards scale with Momentum; it fades by 1 each turn.' },
   focus:      { name:'Focus',      icon:'🎯', color:'#7fc6a0', kind:'buff',
                 desc:'Empowers Focus cards and your companion.' },
   conviction: { name:'Conviction', icon:'⚜️', color:'#ffe08a', kind:'buff',

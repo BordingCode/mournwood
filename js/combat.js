@@ -149,6 +149,13 @@ export class Combat {
       case 'addCard': { const cnt = op.count || 1; const pile = op.to === 'draw' ? this.drawPile : op.to === 'discard' ? this.discardPile : this.hand;
         for (let i = 0; i < cnt; i++) { if (pile === this.hand && this.hand.length >= 10) break; pile.push(instantiate(op.id)); } break; }
       case 'random': { const choice = this.rng.pick(op.options); [].concat(choice).forEach((o) => this.runOp(o, card, target)); break; }
+      case 'loseStatus': { const cur = amt(this.player, op.status); addStatus(this.player, op.status, -(op.all ? cur : (op.amount || 0))); break; }
+      case 'if': {
+        const e = op.on === 'self' ? this.player : target;
+        const cur = !e ? 0 : (op.status === 'block' ? (e.block || 0) : amt(e, op.status));
+        if (cur >= (op.atLeast || 1)) [].concat(op.then).forEach((o) => this.runOp(o, card, target));
+        break;
+      }
     }
   }
 
@@ -156,7 +163,12 @@ export class Combat {
     if (typeof spec === 'number') return spec;
     if (spec && typeof spec === 'object') {
       let v = spec.base || 0;
-      if (spec.scale) v += (spec.scale.per || 1) * amt(this.player, spec.scale.stat);
+      if (spec.scale) {
+        const st = spec.scale.stat, per = spec.scale.per || 1;
+        // 'block' is a virtual stat: +per for every 4 current Block (Fighter identity)
+        const stacks = st === 'block' ? Math.floor(this.player.block / 4) : amt(this.player, st);
+        v += per * stacks;
+      }
       if (spec.perCombo) v += spec.perCombo * this.cardsThisTurn;
       return Math.max(0, Math.floor(v));
     }

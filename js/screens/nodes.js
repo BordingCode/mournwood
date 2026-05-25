@@ -3,7 +3,7 @@
 
 import { el, mount, screen } from '../ui.js';
 import { Game } from '../state.js';
-import { CARDS, REWARD_POOL } from '../cards.js';
+import { CARDS, REWARD_POOL, CLASS_REWARDS } from '../cards.js';
 import { RELICS, RELIC_LIST } from '../relics.js';
 import { POTION_LIST } from '../potions.js';
 
@@ -18,7 +18,7 @@ function head(title, sub) { return el('header.screen-head', {}, [el('h1', {}, ti
 /* ---------------- card reward ---------------- */
 export function openReward(run, { back, elite }) {
   if (elite) { const unowned = RELIC_LIST.filter((r) => !run.relics.includes(r.id)); if (unowned.length) run.relics.push(rng().pick(unowned).id); }
-  const offered = pickN(REWARD_POOL, 3);
+  const offered = [...pickN(REWARD_POOL, 2), rng().pick(CLASS_REWARDS[run.cls] || REWARD_POOL)];
   const s = screen('node');
   s.append(head('Spoils', elite ? 'You also claim a relic!' : 'Add a card to your deck'),
     el('div.scroll', {}, [

@@ -30,29 +30,29 @@ export const ENEMIES = {
     { id:'chant',  type:'buff', status:'strength', amount:2, weight:2 } ] },
 
   // ---- elites ----
-  orc_berserker: { id:'orc_berserker', name:'Orc Berserker', emoji:'😤', elite:true, hp:[78,92], moves:[
-    { id:'smash',  type:'attack', amount:15, weight:4 },
-    { id:'enrage', type:'buff', status:'strength', amount:3, weight:2 },
-    { id:'flurry', type:'attack', amount:8, times:2, weight:2 } ] },
-  cult_zealot: { id:'cult_zealot', name:'Cult Zealot', emoji:'🔥', elite:true, hp:[74,88], moves:[
-    { id:'searing', type:'attack', amount:13, weight:4 },
+  orc_berserker: { id:'orc_berserker', name:'Orc Berserker', emoji:'😤', elite:true, hp:[96,112], moves:[
+    { id:'smash',  type:'attack', amount:18, weight:4 },
+    { id:'enrage', type:'buff', status:'strength', amount:4, weight:2 },
+    { id:'flurry', type:'attack', amount:9, times:2, weight:2 } ] },
+  cult_zealot: { id:'cult_zealot', name:'Cult Zealot', emoji:'🔥', elite:true, hp:[90,106], moves:[
+    { id:'searing', type:'attack', amount:16, weight:4 },
     { id:'curse',   type:'debuff', status:'vulnerable', amount:3, weight:2 },
-    { id:'ward',    type:'block',  amount:14, weight:2 } ] },
+    { id:'ward',    type:'block',  amount:16, weight:2 } ] },
 
   // ---- boss: High Priest of Ash (3 phases) ----
-  high_priest: { id:'high_priest', name:'High Priest of Ash', emoji:'☠️', boss:true, hp:[210,210],
+  high_priest: { id:'high_priest', name:'High Priest of Ash', emoji:'☠️', boss:true, hp:[270,270],
     phases:[
       { line:'You smell of hope. We will render it down to ash.', moves:[
-        { id:'ash_bolt', type:'attack', amount:11, weight:5 },
-        { id:'dark_ward', type:'block', amount:12, weight:2 },
+        { id:'ash_bolt', type:'attack', amount:13, weight:5 },
+        { id:'dark_ward', type:'block', amount:14, weight:2 },
         { id:'hex', type:'debuff', status:'weak', amount:2, weight:2 } ] },
-      { line:'The Hollow stirs — can you not hear it breathing beneath your feet?', enterBlock:16, moves:[
-        { id:'searing', type:'attack', amount:16, weight:4 },
-        { id:'conflagration', type:'attack', amount:9, times:2, weight:3 },
+      { line:'The Hollow stirs — can you not hear it breathing beneath your feet?', enterBlock:18, moves:[
+        { id:'searing', type:'attack', amount:19, weight:4 },
+        { id:'conflagration', type:'attack', amount:11, times:2, weight:3 },
         { id:'curse', type:'debuff', status:'vulnerable', amount:3, weight:2 } ] },
-      { line:'Too late — the door is OPEN!', enterStrength:4, moves:[
-        { id:'annihilation', type:'attack', amount:24, weight:5 },
-        { id:'frenzy', type:'attack', amount:7, times:3, weight:3 } ] },
+      { line:'Too late — the door is OPEN!', enterStrength:5, moves:[
+        { id:'annihilation', type:'attack', amount:30, weight:5 },
+        { id:'frenzy', type:'attack', amount:8, times:3, weight:3 } ] },
     ] },
 };
 
