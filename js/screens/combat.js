@@ -4,6 +4,8 @@
 import { el, mount, screen, $ } from '../ui.js';
 import { Combat } from '../combat.js';
 import { STATUSES } from '../statuses.js';
+import { RELICS } from '../relics.js';
+import { POTIONS } from '../potions.js';
 import * as FX from '../fx.js';
 import { Audio } from '../audio.js';
 
@@ -30,12 +32,13 @@ export function startCombat({ rng, player, enemyIds, onWin, onLose }) {
 function buildShell() {
   const s = screen('combat');
   ui = {
+    topbar:  el('div.combat-top', { dataset: { testid: 'topbar' } }),
     enemies: el('div.enemies', { dataset: { testid: 'enemies' } }),
     player:  el('div.player-panel', { dataset: { testid: 'player' } }),
     hand:    el('div.hand', { dataset: { testid: 'hand' } }),
     foot:    el('div.combat-foot'),
   };
-  s.append(ui.enemies, ui.player, el('div.hand-wrap', {}, [ui.hand]), ui.foot);
+  s.append(ui.topbar, ui.enemies, ui.player, el('div.hand-wrap', {}, [ui.hand]), ui.foot);
   mount(s);
   ui.root = s;
 }
@@ -43,11 +46,33 @@ function buildShell() {
 /* ---------------- render ---------------- */
 function renderBoard() {
   const snap = C.snapshot();
+  renderTopBar(snap);
   renderEnemies(snap);
   renderPlayer(snap);
   renderHand(snap);
   renderFoot(snap);
   window.__gameState = { screen: 'combat', ...snap, selUid, targeting };
+}
+
+function renderTopBar(snap) {
+  const relics = snap.relics.map((id) => {
+    const r = RELICS[id] || { icon: '◆', name: id, desc: '' };
+    return el('span.relic', { title: `${r.name} — ${r.desc}` }, r.icon);
+  });
+  const potions = snap.potions.map((id, i) => {
+    const p = POTIONS[id] || { icon: '🧪', name: id, desc: '' };
+    return el('button.potion', { title: `${p.name} — ${p.desc}`, dataset: { testid: 'potion' },
+      disabled: C.over, onclick: () => usePotion(i) }, p.icon);
+  });
+  ui.topbar.replaceChildren(
+    el('div.relic-row', { dataset: { testid: 'relics' } }, relics.length ? relics : [el('span.muted', {}, '')]),
+    el('div.potion-row', {}, potions),
+  );
+}
+
+function usePotion(idx) {
+  if (C.over) return;
+  if (C.usePotion(idx)) { Audio.play('potion'); renderBoard(); flush(); }
 }
 
 function statusChips(statuses) {
@@ -74,7 +99,7 @@ function renderEnemies(snap) {
     const node = el('div.enemy' + (dead ? '.dead' : '') + (canTarget ? '.targetable' : ''),
       { dataset: { uid: e.uid, testid: 'enemy' } }, [
         e.intent && !dead
-          ? el('div.intent.' + e.intent.type, {}, [e.intent.icon, e.intent.amount ? String(e.intent.amount) : ''])
+          ? el('div.intent.' + e.intent.type, {}, [e.intent.icon, intentLabel(e.intent)])
           : el('div.intent', { style: { visibility: 'hidden' } }, '·'),
         el('div.portrait', {}, dead ? '☠️' : enemyEmoji(e)),
         el('div.ename', {}, e.name),
@@ -87,7 +112,8 @@ function renderEnemies(snap) {
   // remember count for auto-target
   ui._living = living;
 }
-function enemyEmoji(e) { return ({ goblin: '👺', skeleton: '💀', direwolf: '🐺' })[e.name?.toLowerCase?.()] || e.emoji || '👾'; }
+function enemyEmoji(e) { return e.emoji || '👾'; }
+function intentLabel(it) { if (!it.amount) return ''; return it.times > 1 ? `${it.amount}×${it.times}` : String(it.amount); }
 
 function renderPlayer(snap) {
   const p = snap.player;

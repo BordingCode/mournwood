@@ -18,6 +18,25 @@ export const STATUSES = {
                 desc:'Gains 25% less Block. -1 per turn.' },
   poison:     { name:'Poison',     icon:'☠️', color:'#84cc5a', kind:'debuff', poison:true,
                 desc:'Lose X HP at the start of your turn, then X drops by 1.' },
+  // class scaling stats (used by op-level `scale`) + engine-handled markers
+  rage:       { name:'Rage',       icon:'🔥', color:'#e0653b', kind:'buff',
+                desc:'Rage cards deal +X damage.' },
+  focus:      { name:'Focus',      icon:'🎯', color:'#7fc6a0', kind:'buff',
+                desc:'Empowers Focus cards and your companion.' },
+  conviction: { name:'Conviction', icon:'⚜️', color:'#ffe08a', kind:'buff',
+                desc:'Smites & oaths scale with Conviction.' },
+  piety:      { name:'Piety',      icon:'🙏', color:'#ffd97a', kind:'buff',
+                desc:'Holy cards scale with Piety.' },
+  companion:  { name:'Companion',  icon:'🐾', color:'#7fc6a0', kind:'buff',
+                desc:'A beast strikes a foe at the end of your turn.' },
+  retain:     { name:'Barricade',  icon:'🧱', color:'#9ec5ff', kind:'buff',
+                desc:'Block is no longer lost at the start of your turn.' },
+  beast:      { name:'Beast Form', icon:'🐺', color:'#86d05a', kind:'buff',
+                desc:'In Beast form: melee cards hit harder.' },
+  caster:     { name:'Caster Form',icon:'🌙', color:'#c084fc', kind:'buff',
+                desc:'In Caster form: spells & nature magic empower.' },
+  breath:     { name:'Breath',     icon:'🐲', color:'#ff8a5c', kind:'buff',
+                desc:'A draconic breath attack is ready.' },
 };
 
 export const amt = (e, id) => (e.statuses && e.statuses[id]) || 0;

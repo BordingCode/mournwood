@@ -4,7 +4,7 @@ import { el, mount, screen, hideSplash } from './ui.js';
 import { Game, syncDebug } from './state.js';
 import { CLASSES, CLASS_BY_ID } from './data/classes.js';
 import { RACES, RACE_BY_ID } from './data/races.js';
-import { starterFor } from './cards.js';
+import { buildDeck } from './cards.js';
 import { startCombat } from './screens/combat.js';
 
 /* ---------------- boot ---------------- */
@@ -116,13 +116,17 @@ function startAdventure() {
 function startEncounter() {
   const c = CLASS_BY_ID[Game.selection.classId];
   const r = RACE_BY_ID[Game.selection.raceId];
+  const maxHp = c.hp + (r.id === 'human' ? 5 : 0); // run-level race bonus
   const player = {
     name: `${r.name} ${c.name}`,
-    maxHp: c.hp, hp: c.hp,
-    deck: starterFor(c.id),
+    raceId: r.id,
+    maxHp, hp: maxHp,
+    deck: buildDeck(c.id, r.id),
+    relics: ['ashen_idol'],            // a starter relic so the run has identity
+    potions: ['heal_draught'],         // one starter potion
     statuses: {},
   };
-  const pack = Game.rng.chance(0.5) ? ['goblin', 'goblin'] : ['goblin'];
+  const pack = Game.rng.chance(0.5) ? ['goblin', 'goblin'] : ['goblin', 'bandit'];
   Game.screen = 'combat';
   syncDebug();
   startCombat({

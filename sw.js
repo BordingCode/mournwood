@@ -15,6 +15,8 @@ const SHELL = [
   'js/statuses.js',
   'js/cards.js',
   'js/enemies.js',
+  'js/relics.js',
+  'js/potions.js',
   'js/combat.js',
   'js/screens/combat.js',
   'js/data/classes.js',

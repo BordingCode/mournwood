@@ -1,0 +1,52 @@
+// Relics — run-long passives. Hooks receive the live Combat instance and call its
+// public methods. Tuned to enable strategies without auto-winning. Pure data + fns.
+
+export const RELICS = {
+  ashen_idol:     { id:'ashen_idol', name:'Ashen Idol', icon:'🗿', rarity:'common',
+    desc:'At the start of combat, gain 4 Block.',
+    hooks:{ combatStart:(c)=>c.gainBlock(c.player,4) } },
+  oaken_totem:    { id:'oaken_totem', name:'Oaken Totem', icon:'🌳', rarity:'common',
+    desc:'At the start of each turn, gain 2 Block.',
+    hooks:{ turnStart:(c)=>c.gainBlock(c.player,2) } },
+  bottled_spark:  { id:'bottled_spark', name:'Bottled Spark', icon:'⚡', rarity:'uncommon',
+    desc:'On the first turn of combat, gain 1 Energy.',
+    hooks:{ turnStart:(c)=>{ if(c.turn===1) c.player.energy+=1; } } },
+  swift_boots:    { id:'swift_boots', name:'Swift Boots', icon:'🥾', rarity:'common',
+    desc:'On the first turn of combat, draw 1 extra card.',
+    hooks:{ turnStart:(c)=>{ if(c.turn===1) c.draw(1); } } },
+  warding_charm:  { id:'warding_charm', name:'Warding Charm', icon:'🔮', rarity:'uncommon',
+    desc:'Start each combat with 1 Dexterity.',
+    hooks:{ combatStart:(c)=>c.applyStatus(c.player,'dexterity',1) } },
+  berserker_brand:{ id:'berserker_brand', name:"Berserker's Brand", icon:'🔥', rarity:'uncommon',
+    desc:'Start each combat with 2 Rage.',
+    hooks:{ combatStart:(c)=>c.applyStatus(c.player,'rage',2) } },
+  serpent_fang:   { id:'serpent_fang', name:'Serpent Fang', icon:'🐍', rarity:'uncommon',
+    desc:'The first attack you play each turn applies 2 Poison.',
+    hooks:{ turnStart:(c)=>{ c._fangReady=true; },
+            playCard:(c,card)=>{ if(c._fangReady && card.type==='attack'){ c._fangReady=false; c._fangPending=2; } } } },
+  whetstone:      { id:'whetstone', name:'Whetstone', icon:'🪨', rarity:'common',
+    desc:'Start each combat with 1 Strength.',
+    hooks:{ combatStart:(c)=>c.applyStatus(c.player,'strength',1) } },
+  scholars_lens:  { id:'scholars_lens', name:"Scholar's Lens", icon:'🔍', rarity:'uncommon',
+    desc:'Start each combat with 1 Spellpower.',
+    hooks:{ combatStart:(c)=>c.applyStatus(c.player,'spellpower',1) } },
+  bloodstone:     { id:'bloodstone', name:'Bloodstone', icon:'🩸', rarity:'common',
+    desc:'Heal 6 HP after each combat.',
+    hooks:{ combatEnd:(c)=>{ if(c.result==='win') c.heal(c.player,6); } } },
+  thorned_mail:   { id:'thorned_mail', name:'Thorned Mail', icon:'🛡️', rarity:'uncommon',
+    desc:'When an enemy hits you, it takes 2 damage.',
+    hooks:{ playerHit:(c,enemy)=>{ if(enemy&&enemy.hp>0){ enemy.hp=Math.max(0,enemy.hp-2);} } } },
+  philosophers_egg:{ id:'philosophers_egg', name:"Philosopher's Egg", icon:'🥚', rarity:'rare',
+    desc:'If you play 4+ cards in a turn, gain 1 Energy next turn.',
+    hooks:{ turnStart:(c)=>{ if(c._eggBank){ c.player.energy+=1; c._eggBank=false; } },
+            turnEnd:(c)=>{ if(c.cardsThisTurn>=4) c._eggBank=true; } } },
+  gilded_chalice: { id:'gilded_chalice', name:'Gilded Chalice', icon:'🏆', rarity:'rare',
+    desc:'Start each combat with 1 extra Energy this turn.',
+    hooks:{ combatStart:(c)=>{ c.player.energy+=1; } } },
+   shieldbearer:  { id:'shieldbearer', name:"Shieldbearer's Oath", icon:'⚔️', rarity:'rare',
+    desc:'The first time you would take 12+ damage each combat, halve it.',
+    hooks:{} }, // handled in applyDamage via flag below
+};
+
+export const RELIC_LIST = Object.values(RELICS);
+export function relic(id){ return RELICS[id]; }
