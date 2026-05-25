@@ -8,6 +8,7 @@ import { RELICS } from '../relics.js';
 import { POTIONS } from '../potions.js';
 import * as FX from '../fx.js';
 import { Audio } from '../audio.js';
+import { openDeckViewer, openCodex } from './qol.js';
 
 let C, ui, selUid = null, targeting = false, pending = [], cbWin, cbLose;
 
@@ -67,9 +68,14 @@ function renderTopBar(snap) {
   });
   ui.topbar.replaceChildren(
     el('div.relic-row', { dataset: { testid: 'relics' } }, relics.length ? relics : [el('span.muted', {}, '')]),
-    el('div.potion-row', {}, potions),
+    el('div.potion-row', {}, [
+      ...potions,
+      el('button.potion', { title: 'View deck', dataset: { testid: 'btn-deck' }, onclick: () => openDeckViewer('Deck', deckIds()) }, '🂠'),
+      el('button.potion', { title: 'Keywords', dataset: { testid: 'btn-codex' }, onclick: openCodex }, '📜'),
+    ]),
   );
 }
+function deckIds() { return [...C.hand, ...C.drawPile, ...C.discardPile, ...C.exhaustPile].map((c) => c.id); }
 
 function usePotion(idx) {
   if (C.over) return;

@@ -8,11 +8,12 @@ import { buildDeck } from './cards.js';
 
 const HERO_R = 16;
 
-export function createRun({ race, cls, mode, rng }) {
+export function createRun({ race, cls, mode, rng, slot = null }) {
   const cdef = CLASS_BY_ID[cls];
   const maxHp = cdef.hp + (race === 'human' ? 5 : 0);
   const region = makeRegion(mode, rng);
   return {
+    slot,
     race, cls, mode,
     name: `${RACE_BY_ID[race].name} ${cdef.name}`,
     maxHp, hp: maxHp,

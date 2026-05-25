@@ -35,5 +35,9 @@ Art is generated in **Midjourney** and dropped into `assets/`. A full prompt pac
 - Icons: **game-icons.net** (CC-BY-3.0). Fonts: **Cinzel** & **Inter** (OFL, Google Fonts).
 - Music: **Eric Matyas / soundimage.org** (attribution) + OpenGameArt CC0. SFX: **Kenney.nl** (CC0).
 
----
-*Status: in active development (vertical slice — region of Aldermoor).*
+## Status
+Vertical slice **complete & playable**: title → save slots → race/class select → Hearthvale hub →
+free-roam Mournwood (joystick) → combat / shop / rest / events / Ward-Stone → 3-phase boss → ending.
+9 classes × 9 races, relics, potions, multi-slot saves, settings/QoL, offline PWA. Art via `docs/ART.md`.
+
+Test it: `python3 -m http.server 8099 --directory .` · run tests: `node --test test/` · balance fuzzer: `node test/fuzzer.mjs`.

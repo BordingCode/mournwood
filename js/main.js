@@ -9,9 +9,14 @@ import { createRun, combatant, encounterFor, goldReward } from './run.js';
 import { openMap } from './screens/map.js';
 import { openHub } from './screens/hub.js';
 import { openReward, openShop, openRest, openEvent, openWard, openEnding, openDefeat } from './screens/nodes.js';
+import { saveRun, loadRun, hasAny, clearSlot } from './save.js';
+import { openSaves } from './screens/saves.js';
+import { openSettings, applySettings } from './settings.js';
+import { openDeckViewer } from './screens/qol.js';
 
 /* ---------------- boot ---------------- */
 function boot() {
+  applySettings(); // restore + apply saved preferences (volume, motion, text size, …)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
@@ -35,8 +40,8 @@ function routeTitle() {
     el('p.game-tag', {}, 'A roguelite card adventure'),
     el('nav.menu', {}, [
       el('button.btn.btn-primary', { dataset:{ testid:'btn-new' }, onclick:() => go('select') }, 'New Adventure'),
-      el('button.btn', { disabled:true, dataset:{ testid:'btn-continue' } }, 'Continue'),
-      el('button.btn.btn-ghost', { disabled:true }, 'Settings'),
+      el('button.btn', { disabled:!hasAny(), dataset:{ testid:'btn-continue' }, onclick: openContinue }, 'Continue'),
+      el('button.btn.btn-ghost', { dataset:{ testid:'btn-settings' }, onclick: () => openSettings(() => go('title')) }, 'Settings'),
     ]),
   ]));
   mount(s);
@@ -110,22 +115,36 @@ function markSel(grid, id) {
 function startAdventure() {
   const { raceId, classId } = Game.selection;
   if (!raceId || !classId) return;
-  openHub({ race: raceId, cls: classId }, { onVenture: startRun });
+  openSaves('new', {
+    onPick: (i) => { Game.slot = i; openHub({ race: raceId, cls: classId }, { onVenture: startRun }); },
+    onBack: () => go('select'),
+  });
+}
+
+function openContinue() {
+  openSaves('load', {
+    allowDelete: true,
+    onPick: (i) => { const run = loadRun(i); if (!run) return; Game.run = run; Game.slot = i;
+      Game.selection = { raceId: run.race, classId: run.cls }; openWorld(); },
+    onBack: () => go('title'),
+  });
 }
 
 function startRun(mode) {
-  Game.run = createRun({ race: Game.selection.raceId, cls: Game.selection.classId, mode, rng: Game.rng });
+  Game.run = createRun({ race: Game.selection.raceId, cls: Game.selection.classId, mode, rng: Game.rng, slot: Game.slot });
+  saveRun(Game.run);
   openWorld();
 }
 
 function openWorld() {
+  saveRun(Game.run);
   Game.screen = 'map';
   openMap(Game.run, { onNode: resolveNode, onMenu: openPause });
 }
 
 function resolveNode(poi) {
   const run = Game.run;
-  const back = () => { run.cleared[poi.id] = true; openWorld(); };
+  const back = () => { run.cleared[poi.id] = true; saveRun(run); openWorld(); };
   if (poi.type === 'combat' || poi.type === 'elite') startNodeCombat(poi);
   else if (poi.type === 'boss') startBossCombat(poi);
   else if (poi.type === 'shop') openShop(run, { back });
@@ -139,7 +158,7 @@ function startNodeCombat(poi) {
   Game.screen = 'combat'; syncDebug();
   startCombat({
     rng: Game.rng, player: combatant(run), enemyIds: encounterFor(poi, Game.rng),
-    onWin: (hp) => { run.hp = hp; run.gold += goldReward(poi, Game.rng); run.cleared[poi.id] = true;
+    onWin: (hp) => { run.hp = hp; run.gold += goldReward(poi, Game.rng); run.cleared[poi.id] = true; saveRun(run);
       openReward(run, { back: openWorld, elite: poi.type === 'elite' }); },
     onLose: startDefeat,
   });
@@ -150,15 +169,16 @@ function startBossCombat(poi) {
   Game.screen = 'combat'; syncDebug();
   startCombat({
     rng: Game.rng, player: combatant(run), enemyIds: ['high_priest'],
-    onWin: (hp) => { run.hp = hp; run.cleared.boss = true; openEnding(run, { toTitle: () => go('title') }); },
+    onWin: (hp) => { run.hp = hp; run.cleared.boss = true; clearSlot(run.slot); openEnding(run, { toTitle: () => go('title') }); },
     onLose: startDefeat,
   });
 }
 
 function startDefeat() {
   openDefeat(Game.run, { restart: () => {
-    const { race, cls, mode } = Game.run;
-    Game.run = createRun({ race, cls, mode, rng: Game.rng });
+    const { race, cls, mode, slot } = Game.run;
+    Game.run = createRun({ race, cls, mode, rng: Game.rng, slot });
+    saveRun(Game.run);
     openWorld();
   } });
 }
@@ -169,6 +189,8 @@ function openPause() {
     el('h2', { style: { fontSize: '1.7rem', color: 'var(--parchment)' } }, 'Paused'),
     el('nav.menu', {}, [
       el('button.btn.btn-primary', { onclick: () => { ov.remove(); openWorld(); } }, 'Resume'),
+      el('button.btn', { onclick: () => openDeckViewer('Your Deck', Game.run.deck) }, 'View Deck'),
+      el('button.btn', { onclick: () => { ov.remove(); openSettings(openWorld); } }, 'Settings'),
       el('button.btn.btn-ghost', { onclick: () => { ov.remove(); go('title'); } }, 'Abandon run'),
     ]),
   ]);
