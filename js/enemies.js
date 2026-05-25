@@ -14,7 +14,7 @@ export const ENEMIES = {
     { id:'guard',       type:'block',  amount:7, weight:2 } ] },
   direwolf: { id:'direwolf', name:'Dire Wolf', emoji:'🐺', hp:[28,34], moves:[
     { id:'bite', type:'attack', amount:7, weight:4 },
-    { id:'howl', type:'buff', status:'strength', amount:2, weight:2 },
+    { id:'hunger', type:'ramp', amount:1, weight:3 }, // grows hungrier each turn — punishes stalling
     { id:'maul', type:'attack', amount:11, weight:2 } ] },
   bandit: { id:'bandit', name:'Bandit', emoji:'🗡️', hp:[32,40], moves:[
     { id:'cut',   type:'attack', amount:8, weight:4 },
@@ -31,12 +31,13 @@ export const ENEMIES = {
 
   // ---- elites ----
   orc_berserker: { id:'orc_berserker', name:'Orc Berserker', emoji:'😤', elite:true, hp:[96,112], moves:[
-    { id:'smash',  type:'attack', amount:18, weight:4 },
+    { id:'smash',  type:'attack', amount:18, weight:3 },
+    { id:'wind_up', type:'charge', amount:30, releaseId:'devastate', weight:2 }, // telegraphed two-beat blow
     { id:'enrage', type:'buff', status:'strength', amount:4, weight:2 },
     { id:'flurry', type:'attack', amount:9, times:2, weight:2 } ] },
   cult_zealot: { id:'cult_zealot', name:'Cult Zealot', emoji:'🔥', elite:true, hp:[90,106], moves:[
     { id:'searing', type:'attack', amount:16, weight:4 },
-    { id:'curse',   type:'debuff', status:'vulnerable', amount:3, weight:2 },
+    { id:'raise_dead', type:'summon', summonId:'skeleton', cap:3, weight:2 }, // raises skeletons (capped)
     { id:'ward',    type:'block',  amount:16, weight:2 } ] },
 
   // ---- boss: High Priest of Ash (3 phases) ----
@@ -45,18 +46,20 @@ export const ENEMIES = {
       { line:'You smell of hope. We will render it down to ash.', moves:[
         { id:'ash_bolt', type:'attack', amount:13, weight:5 },
         { id:'dark_ward', type:'block', amount:14, weight:2 },
+        { id:'ember_growth', type:'ramp', amount:1, weight:2 }, // stalling lets his fire grow
         { id:'hex', type:'debuff', status:'weak', amount:2, weight:2 } ] },
       { line:'The Hollow stirs — can you not hear it breathing beneath your feet?', enterBlock:18, moves:[
         { id:'searing', type:'attack', amount:19, weight:4 },
         { id:'conflagration', type:'attack', amount:11, times:2, weight:3 },
+        { id:'call_faithful', type:'summon', summonId:'cultist', cap:3, weight:2 }, // raises the faithful (capped)
         { id:'curse', type:'debuff', status:'vulnerable', amount:3, weight:2 } ] },
       { line:'Too late — the door is OPEN!', enterStrength:5, moves:[
-        { id:'annihilation', type:'attack', amount:30, weight:5 },
+        { id:'annihilation', type:'charge', amount:28, releaseId:'cataclysm', weight:4 }, // winds up a killing blow
         { id:'frenzy', type:'attack', amount:8, times:3, weight:3 } ] },
     ] },
 };
 
-export const ENEMY_INTENT_ICON = { attack:'⚔️', block:'🛡️', buff:'⬆️', debuff:'🌀' };
+export const ENEMY_INTENT_ICON = { attack:'⚔️', block:'🛡️', buff:'⬆️', debuff:'🌀', charge:'💥', summon:'☠️', ramp:'📈' };
 
 let _eid = 0;
 export function makeEnemy(rng, id) {
@@ -74,6 +77,13 @@ export function makeEnemy(rng, id) {
 }
 
 export function rollIntent(rng, e) {
+  if (e.forcedNext) { // a charge release is queued — it bypasses the weighted roll
+    const f = e.forcedNext; e.forcedNext = null;
+    e.intent = { moveId: f.moveId, type: f.type, amount: f.amount || 0, times: f.times || 1,
+      status: f.status || null, icon: ENEMY_INTENT_ICON[f.type] || '❔' };
+    e.history.push(f.moveId);
+    return e.intent;
+  }
   const moves = e.moves || e.def.moves;
   const last2 = e.history.slice(-2);
   let pool = moves.filter((m) => !(last2.length === 2 && last2.every((x) => x === m.id)));
@@ -84,6 +94,7 @@ export function rollIntent(rng, e) {
   e.intent = {
     moveId: move.id, type: move.type, amount: move.amount || 0, times: move.times || 1,
     status: move.status || null, icon: ENEMY_INTENT_ICON[move.type] || '❔',
+    summonId: move.summonId, cap: move.cap, releaseId: move.releaseId, max: move.max, // charge/summon/ramp params
   };
   e.history.push(move.id);
   return e.intent;
@@ -96,7 +107,7 @@ export function advanceBoss(rng, e) {
   if (target > e.phase) {
     e.phase = target;
     const ph = e.def.phases[target];
-    e.moves = ph.moves; e.history = [];
+    e.moves = ph.moves; e.history = []; e.forcedNext = null; // a new phase overrides any queued charge
     if (ph.enterBlock) e.block += ph.enterBlock;
     if (ph.enterStrength) e.statuses.strength = (e.statuses.strength || 0) + ph.enterStrength;
     e.transition = ph.line;

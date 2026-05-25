@@ -239,6 +239,21 @@ export class Combat {
     else if (it.type === 'block') this.gainBlock(e, it.amount);
     else if (it.type === 'buff') this.applyStatus(e, it.status, it.amount);
     else if (it.type === 'debuff') this.applyStatus(this.player, it.status, it.amount);
+    else if (it.type === 'ramp') {
+      // escalating Strength — gains accelerate the longer you stall (capped per hit)
+      e.rampStacks = Math.min((e.rampStacks || 0) + 1, it.max || 5);
+      this.applyStatus(e, 'strength', (it.amount || 1) + (e.rampStacks - 1));
+    } else if (it.type === 'summon') {
+      // raise minions, but never exceed the cap (keeps the fuzzer terminating)
+      let room = (it.cap || 4) - this.livingEnemies().length;
+      for (let i = 0; i < times && room > 0; i++, room--) {
+        const ne = makeEnemy(this.rng, it.summonId);
+        this.enemies.push(ne); this.h.onSummon({ enemy: ne });
+      }
+    } else if (it.type === 'charge') {
+      // wind-up: no damage now; force a devastating release next turn (2-beat telegraph)
+      e.forcedNext = { moveId: it.releaseId || 'unleash', type: 'attack', amount: it.amount, times: it.times || 1, status: null };
+    }
   }
 
   /* ---------------- relics / potions / race ---------------- */

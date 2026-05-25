@@ -16,7 +16,7 @@ let C, ui, selUid = null, targeting = false, pending = [], cbWin, cbLose;
 
 const idOf = (e) => (e.isPlayer ? 'player' : e.uid);
 const ENEMY_ICON = { goblin:'goblin', skeleton:'skeleton', direwolf:'beast', bandit:'bandit', orc:'orc', cultist:'cultist', orc_berserker:'orc', cult_zealot:'cultist', high_priest:'boss' };
-const INTENT_ICON = { attack:'sword', block:'shield', buff:'chevup', debuff:'chevdown' };
+const INTENT_ICON = { attack:'sword', block:'shield', buff:'chevup', debuff:'chevdown', charge:'charge', summon:'grave', ramp:'strength' };
 
 export function startCombat({ rng, player, enemyIds, onWin, onLose }) {
   cbWin = onWin; cbLose = onLose; selUid = null; targeting = false; pending = [];

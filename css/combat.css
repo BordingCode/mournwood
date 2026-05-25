@@ -46,6 +46,14 @@
 .intent.block { color:#9ec5ff; border-color:rgba(59,130,246,.5); }
 .intent.buff { color:#ffd97a; }
 .intent.debuff { color:#c9a6ff; }
+.intent.ramp { color:#ffc154; border-color:rgba(245,158,11,.5); }
+.intent.summon { color:#c9a6ff; border-color:rgba(125,63,184,.55); }
+.intent.charge { color:#ff8a5a; border-color:rgba(239,68,68,.7);
+  animation:chargePulse 1s ease-in-out infinite; }
+@keyframes chargePulse {
+  0%,100% { transform:scale(1); box-shadow:0 0 0 0 rgba(255,138,90,0); }
+  50% { transform:scale(1.1); box-shadow:0 0 10px 1px rgba(255,138,90,.65); } }
+@media (prefers-reduced-motion:reduce) { .intent.charge { animation:none; } }
 
 .portrait .ico, .portrait .art { width:56px; height:56px; color:var(--parchment); }
 .portrait .art-img { border-radius:16px; }

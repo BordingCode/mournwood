@@ -19,6 +19,7 @@ export const ICONS = {
   shield: '<path d="M12 3l7 3v5c0 4.6-3 7.6-7 9-4-1.4-7-4.4-7-9V6z"/>',
   chevup: '<path d="M6 14l6-6 6 6"/>',
   chevdown: '<path d="M6 10l6 6 6-6"/>',
+  charge: '<circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
 
   /* ---- statuses ---- */
   strength: '<path d="M4 9v6M7 9v6M17 9v6M20 9v6"/><path d="M4 12h16" stroke-width="2.6"/>',
